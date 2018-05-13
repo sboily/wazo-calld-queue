@@ -1,0 +1,48 @@
+paths:
+  /queues:
+    get:
+      summary: Get queues
+      description: '**Required ACL:** `ctid-ng.queues.read`'
+      tags:
+      - queues
+      responses:
+        '200':
+          description: The list of queues
+          schema:
+            $ref: '#/definitions/QueueList'
+        '503':
+          $ref: '#/responses/AnotherServiceUnavailable'
+  /queues/{queue_name}:
+    get:
+      summary: Get queue status
+      description: '**Required ACL:** `ctid-ng.queues.{queue_name}.read`'
+      parameters:
+        - $ref: '#/parameters/QueueName'
+      tags:
+      - queues
+      responses:
+        '200':
+          description: The status of a queue
+          schema:
+            $ref: '#/definitions/Queue'
+        '503':
+          $ref: '#/responses/AnotherServiceUnavailable'
+definitions:
+  Queue:
+    type: object
+    properties:
+      id:
+        description: Unique identifier of the queue
+        type: string
+  QueueList:
+    type: object
+    properties:
+      items:
+        $ref: '#/definitions/Queue'
+parameters:
+  QueueName:
+    name: queue_name
+    in: path
+    description: Name of the queue
+    required: true
+    type: string

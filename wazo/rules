@@ -1,0 +1,27 @@
+#!/bin/sh
+# Copyright 2018 Sylvain Boily
+# SPDX-License-Identifier: GPL-3.0+
+
+case "$1" in
+    build)
+        python setup.py bdist
+        ;;
+
+    package)
+        tar xvf dist/wazo-ctid-queue-*.tar.gz -C ${pkgdir}
+        cp -R etc ${pkgdir}/
+        ;;
+
+    install)
+        systemctl restart xivo-ctid-ng
+        ;;
+
+    uninstall)
+        systemctl restart xivo-ctid-ng
+        ;;
+
+    *)
+        echo "$0 called with unknown argument '$1'" >&2
+        exit 1
+    ;;
+esac

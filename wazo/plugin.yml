@@ -1,0 +1,9 @@
+name: wazo-ctid-queue
+namespace: sboily
+version: 0.0.1
+author: Sylvain Boily
+display_name: CTI queue
+tags:
+  - experimental
+  - queue
+homepage: https://github.com/sboily/wazo-ctid-queue
