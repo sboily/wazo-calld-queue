@@ -69,6 +69,19 @@ definitions:
     properties:
       items:
         $ref: '#/definitions/Queue'
+  QueueAddMember:
+    type: object
+    properties:
+      interface:
+        type: string
+      penalty:
+        type: integer
+      paused:
+        type: integer
+      member_name:
+        type: string
+      state_interface:
+        type: string
 parameters:
   QueueName:
     name: queue_name
