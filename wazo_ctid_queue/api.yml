@@ -32,6 +32,7 @@ paths:
       summary: Add new member in queue
       description: '**Required ACL:** `ctid-ng.queues.{queue_name}.add_member.update`'
       parameters:
+        - $ref: '#/parameters/QueueName'
         - $ref: '#/parameters/QueueAddMember'
       tags:
       - queues
@@ -47,6 +48,7 @@ paths:
       summary: Remove existing member from queue
       description: '**Required ACL:** `ctid-ng.queues.{queue_name}.remove_member.update`'
       parameters:
+        - $ref: '#/parameters/QueueName'
         - $ref: '#/parameters/QueueRemoveMember'
       tags:
       - queues
@@ -101,3 +103,9 @@ parameters:
     required: true
     schema:
       $ref: '#/definitions/QueueAddMember'
+  QueueRemoveMember:
+    name: interface
+    in: path
+    description: Name of the member interface
+    required: true
+    type: string
