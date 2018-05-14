@@ -39,7 +39,7 @@ paths:
         '201':
           description: Member has been added to the queue
           schema:
-            $ref: '#/definitions/Queue'
+            $ref: '#/definitions/QueueAddMember'
         '503':
           $ref: '#/responses/AnotherServiceUnavailable'
   /queues/{queue_name}/remove_member:
@@ -73,14 +73,19 @@ definitions:
     type: object
     properties:
       interface:
+        description: Interface
         type: string
       penalty:
+        description: Penalty
         type: integer
       paused:
+        description: Paused
         type: integer
       member_name:
+        description: Member name
         type: string
       state_interface:
+        description: Interface state
         type: string
 parameters:
   QueueName:
@@ -89,3 +94,10 @@ parameters:
     description: Name of the queue
     required: true
     type: string
+  QueueAddMember:
+    name: body
+    in: body
+    description: Parameters of the queue member
+    required: true
+    schema:
+      $ref: '#/definitions/QueueAddMember'
