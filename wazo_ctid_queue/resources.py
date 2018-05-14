@@ -61,9 +61,7 @@ class QueueRemoveMemberResource(AuthResource):
 
     @required_acl('ctid-ng.queues.{queue_name}.remove_member.update')
     def put(self, queue_name):
-        print(request.get_json(force=True))
         request_body = queue_member_schema.load(request.get_json(force=True)).data
-        print(request_body)
         result = self._queues_service.remove_queue_member(queue_name, request_body['interface'])
 
         return result, 204
