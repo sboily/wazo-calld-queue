@@ -65,3 +65,16 @@ class QueueRemoveMemberResource(AuthResource):
         result = self._queues_service.remove_queue_member(queue_name, request_body['interface'])
 
         return result, 204
+
+
+class QueuePauseMemberResource(AuthResource):
+
+    def __init__(self, queues_service):
+        self._queues_service = queues_service
+
+    @required_acl('ctid-ng.queues.{queue_name}.pause_member.update')
+    def put(self, queue_name):
+        request_body = queue_member_schema.load(request.get_json(force=True)).data
+        result = self._queues_service.pause_queue_member(queue_name, request_body)
+
+        return result, 204

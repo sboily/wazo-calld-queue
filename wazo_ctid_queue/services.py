@@ -60,6 +60,15 @@ class QueueService(object):
         }
         return self.amid.action('queueremove', remove_member)
 
+    def pause_queue_member(self, queue_name, params):
+        pause_member = {
+            'Interface': params.get('interface'),
+            'Paused': params.get('paused'),
+            'Queue':  queue_name,
+            'Reason': params.get('reason')
+        }
+        return self.amid.action('queuepause', pause_member)
+
     def _queues(self, queue):
         return {'logged_in': queue['LoggedIn'],
                 'available': queue['Available'],

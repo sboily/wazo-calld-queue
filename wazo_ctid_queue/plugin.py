@@ -10,6 +10,7 @@ from .resources import (
     QueueResource,
     QueueAddMemberResource,
     QueueRemoveMemberResource,
+    QueuePauseMemberResource,
     )
 from .services import QueueService
 from .bus_consume import QueuesBusEventHandler
@@ -38,3 +39,4 @@ class Plugin(object):
         api.add_resource(QueueResource, '/queues/<queue_name>', resource_class_args=[queues_service])
         api.add_resource(QueueAddMemberResource, '/queues/<queue_name>/add_member', resource_class_args=[queues_service])
         api.add_resource(QueueRemoveMemberResource, '/queues/<queue_name>/remove_member', resource_class_args=[queues_service])
+        api.add_resource(QueuePauseMemberResource, '/queues/<queue_name>/pause_member', resource_class_args=[queues_service])

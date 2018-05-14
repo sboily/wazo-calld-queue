@@ -59,6 +59,22 @@ paths:
             $ref: '#/definitions/QueueRemoveMember'
         '503':
           $ref: '#/responses/AnotherServiceUnavailable'
+  /queues/{queue_name}/pause_member:
+    put:
+      summary: Pause/Unpause members in queue
+      description: '**Required ACL:** `ctid-ng.queues.{queue_name}.pause_member.update`'
+      parameters:
+        - $ref: '#/parameters/QueueName'
+        - $ref: '#/parameters/QueuePauseMember'
+      tags:
+      - queues
+      responses:
+        '204':
+          description: Member has been removed from the queue
+          schema:
+            $ref: '#/definitions/QueuePauseMember'
+        '503':
+          $ref: '#/responses/AnotherServiceUnavailable'
 definitions:
   Queue:
     type: object
@@ -95,6 +111,18 @@ definitions:
       interface:
         description: Interface
         type: string
+  QueuePauseMember:
+    type: object
+    properties:
+      interface:
+        description: Interface
+        type: string
+      paused:
+        description: Paused
+        type: integer
+      reason:
+        description: Paused reason
+        type: string
 parameters:
   QueueName:
     name: queue_name
@@ -112,7 +140,14 @@ parameters:
   QueueRemoveMember:
     name: body
     in: body
-    description: Name of the member interface
+    description: Parameter of member interface
     required: true
     schema:
       $ref: '#/definitions/QueueRemoveMember'
+  QueuePauseMember:
+    name: body
+    in: body
+    description: Parameter of member to pause/unpause
+    required: true
+    schema:
+      $ref: '#/definitions/QueuePauseMember'
