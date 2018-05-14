@@ -52,6 +52,7 @@ class QueueMemberSchema(Schema):
     paused = fields.Integer()
     member_name = fields.Str()
     state_interface = fields.Str()
+    reason = fields.Str()
 
     class Meta:
         strict = True
