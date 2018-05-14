@@ -3,12 +3,15 @@
 # SPDX-License-Identifier: GPL-3.0+
 
 
+from flask import request
+
 from xivo_ctid_ng.auth import required_acl
 from xivo_ctid_ng.rest_api import AuthResource
 
 from .schema import (
     queue_list_schema,
     queue_schema,
+    queue_member_schema,
 )
 
 
@@ -36,3 +39,29 @@ class QueueResource(AuthResource):
         queue = self._queues_service.get_queue(queue_name)
 
         return queue_schema.dump(queue).data
+
+
+class QueueAddMemberResource(AuthResource):
+
+    def __init__(self, queues_service):
+        self._queues_service = queues_service
+
+    @required_acl('ctid-ng.queues.{queue_name}.add_member.update')
+    def put(self, queue_name):
+        request_body = queue_member_schema.load(request.get_json(force=True)).data
+        result = self._queues_service.add_queue_member(queue_name, request_body)
+
+        return result, 204
+
+
+class QueueRemoveMemberResource(AuthResource):
+
+    def __init__(self, queues_service):
+        self._queues_service = queues_service
+
+    @required_acl('ctid-ng.queues.{queue_name}.remove_member.update')
+    def put(self, queue_name):
+        request_body = queue_member_schema.load(request.get_json(force=True)).data
+        result = self._queues_service.remove_queue_member(queue_name, request_body['interface'])
+
+        return result, 204

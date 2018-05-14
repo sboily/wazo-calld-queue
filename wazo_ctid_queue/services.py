@@ -41,6 +41,25 @@ class QueueService(object):
                 q['members'].append(self._member(ev))
         return q
 
+    def add_queue_member(self, queue_name, member):
+        add_member = {
+            'Queue': queue_name,
+            'Interface': member.get('interface'),
+            'Penalty': member.get('penalty'),
+            'Paused': member.get('paused'),
+            'MemberName': member.get('member_name'),
+            'StateInterface': member.get('state_interface')
+        }
+        return self.amid.action('queueadd', add_member)
+
+
+    def remove_queue_member(self, queue_name, interface):
+        remove_member = {
+            'Queue': queue_name,
+            'Interface': interface
+        }
+        return self.amid.action('queueremove', remove_member)
+
     def _queues(self, queue):
         return {'logged_in': queue['LoggedIn'],
                 'available': queue['Available'],

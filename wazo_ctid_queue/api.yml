@@ -27,6 +27,36 @@ paths:
             $ref: '#/definitions/Queue'
         '503':
           $ref: '#/responses/AnotherServiceUnavailable'
+  /queues/{queue_name}/add_member:
+    put:
+      summary: Add new member in queue
+      description: '**Required ACL:** `ctid-ng.queues.{queue_name}.add_member.update`'
+      parameters:
+        - $ref: '#/parameters/QueueAddMember'
+      tags:
+      - queues
+      responses:
+        '201':
+          description: Member has been added to the queue
+          schema:
+            $ref: '#/definitions/Queue'
+        '503':
+          $ref: '#/responses/AnotherServiceUnavailable'
+  /queues/{queue_name}/remove_member:
+    put:
+      summary: Remove existing member from queue
+      description: '**Required ACL:** `ctid-ng.queues.{queue_name}.remove_member.update`'
+      parameters:
+        - $ref: '#/parameters/QueueRemoveMember'
+      tags:
+      - queues
+      responses:
+        '201':
+          description: Member has been removed from the queue
+          schema:
+            $ref: '#/definitions/Queue'
+        '503':
+          $ref: '#/responses/AnotherServiceUnavailable'
 definitions:
   Queue:
     type: object
