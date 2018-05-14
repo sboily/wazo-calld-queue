@@ -46,12 +46,12 @@ class QueueSchema(Schema):
 
 
 class QueueMember(Schema):
-     queue = fields.Str()
-     interface = fields.Str()
-     penalty = fields.Integer()
-     paused = fields.Integer()
-     member_name = fields.Str()
-     state_interface = fields.Str()
+    queue = fields.Str()
+    interface = fields.Str()
+    penalty = fields.Integer()
+    paused = fields.Integer()
+    member_name = fields.Str()
+    state_interface = fields.Str()
 
     class Meta:
         strict = True
