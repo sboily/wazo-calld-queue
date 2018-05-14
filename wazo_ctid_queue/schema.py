@@ -45,7 +45,7 @@ class QueueSchema(Schema):
         strict = True
 
 
-class QueueMember(Schema):
+class QueueMemberSchema(Schema):
     queue = fields.Str()
     interface = fields.Str()
     penalty = fields.Integer()
