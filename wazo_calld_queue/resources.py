@@ -26,7 +26,7 @@ class QueuesResource(AuthResource):
         queues = self._queues_service.list_queues()
 
         return {
-            'items': queue_list_schema.dump(queues, many=True).data
+            'items': queue_list_schema.dump(queues, many=True)
         }, 200
 
 
@@ -39,7 +39,7 @@ class QueueResource(AuthResource):
     def get(self, queue_name):
         queue = self._queues_service.get_queue(queue_name)
 
-        return queue_schema.dump(queue).data
+        return queue_schema.dump(queue)
 
 
 class QueueAddMemberResource(AuthResource):
@@ -49,7 +49,7 @@ class QueueAddMemberResource(AuthResource):
 
     @required_acl('calld.queues.{queue_name}.add_member.update')
     def put(self, queue_name):
-        request_body = queue_member_schema.load(request.get_json(force=True)).data
+        request_body = queue_member_schema.load(request.get_json(force=True))
         result = self._queues_service.add_queue_member(queue_name, request_body)
 
         return result, 204
@@ -62,7 +62,7 @@ class QueueRemoveMemberResource(AuthResource):
 
     @required_acl('calld.queues.{queue_name}.remove_member.update')
     def put(self, queue_name):
-        request_body = queue_member_schema.load(request.get_json(force=True)).data
+        request_body = queue_member_schema.load(request.get_json(force=True))
         result = self._queues_service.remove_queue_member(queue_name, request_body['interface'])
 
         return result, 204
@@ -75,7 +75,7 @@ class QueuePauseMemberResource(AuthResource):
 
     @required_acl('calld.queues.{queue_name}.pause_member.update')
     def put(self, queue_name):
-        request_body = queue_member_schema.load(request.get_json(force=True)).data
+        request_body = queue_member_schema.load(request.get_json(force=True))
         result = self._queues_service.pause_queue_member(queue_name, request_body)
 
         return result, 204
