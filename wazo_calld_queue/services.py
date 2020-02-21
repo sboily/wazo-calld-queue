@@ -19,8 +19,9 @@ import logging
 
 class QueueService(object):
 
-    def __init__(self, amid):
+    def __init__(self, amid, publisher):
         self.amid = amid
+        self.publisher = publisher
 
     def list_queues(self):
         queues = self.amid.action('queuesummary')
@@ -68,6 +69,10 @@ class QueueService(object):
             'Reason': params.get('reason')
         }
         return self.amid.action('queuepause', pause_member)
+
+   def queue_log(self, queue_log):
+        self.publisher._queue_log(queue_log)
+        return 1
 
     def _queues(self, queue):
         return {'logged_in': queue['LoggedIn'],

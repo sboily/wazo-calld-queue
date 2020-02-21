@@ -32,10 +32,10 @@ class Plugin(object):
 
         token_changed_subscribe(amid_client.set_token)
 
-        queues_service = QueueService(amid_client)
-
         queues_bus_event_handler = QueuesBusEventHandler(bus_publisher)
         queues_bus_event_handler.subscribe(bus_consumer)
+
+        queues_service = QueueService(amid_client, queues_bus_event_handler)
 
         api.add_resource(QueuesResource, '/queues', resource_class_args=[queues_service])
         api.add_resource(QueueResource, '/queues/<queue_name>', resource_class_args=[queues_service])

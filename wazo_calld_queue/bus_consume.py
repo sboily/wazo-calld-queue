@@ -26,6 +26,15 @@ class QueuesBusEventHandler(object):
         bus_consumer.on_ami_event('QueueMemberRinginuse', self._queue_member_ringinuse)
         bus_consumer.on_ami_event('QueueMemberStatus', self._queue_member_status)
 
+    def _queue_log(self, event):
+        bus_event = ArbitraryEvent(
+            name='queue_log',
+            body=event,
+            required_acl='events.queues'
+        )
+        bus_event.routing_key = 'queues.queue_log'
+        self.bus_publisher.publish(bus_event)
+
     def _queue_caller_abandon(self, event):
         bus_event = ArbitraryEvent(
             name='queue_caller_abandon',

@@ -87,7 +87,9 @@ class QueueLogStoreResource(Resource):
         self._queues_service = queues_service
 
     def post(self):
-        return 1, 200
+        request_body = request.form.to_dict()
+        result = self._queues_service.queue_log(request_body)
+        return result, 200
 
 
 class QueueLogRequireResource(Resource):
