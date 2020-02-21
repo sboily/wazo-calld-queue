@@ -16,7 +16,7 @@ setup(
     packages=find_packages(),
     include_package_data=True,
     package_data={
-        'wazo_call_queue': ['api.yml'],
+        'wazo_calld_queue': ['api.yml'],
     },
     entry_points={
         'wazo_calld.plugins': [
