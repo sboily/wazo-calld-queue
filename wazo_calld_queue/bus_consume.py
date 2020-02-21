@@ -32,7 +32,7 @@ class QueuesBusEventHandler(object):
             body=event,
             required_acl='events.queues'
         )
-        bus_event.routing_key = 'queues.queue_log'
+        bus_event.routing_key = 'calls.queues.queue_log'
         self.bus_publisher.publish(bus_event)
 
     def _queue_caller_abandon(self, event):
@@ -41,7 +41,7 @@ class QueuesBusEventHandler(object):
             body=event,
             required_acl='events.queues'
         )
-        bus_event.routing_key = 'queues.caller_abandon'
+        bus_event.routing_key = 'calls.queues.caller_abandon'
         self.bus_publisher.publish(bus_event)
 
     def _queue_caller_join(self, event):
@@ -50,7 +50,7 @@ class QueuesBusEventHandler(object):
             body=event,
             required_acl='events.queues'
         )
-        bus_event.routing_key = 'queues.caller_join'
+        bus_event.routing_key = 'calls.queues.caller_join'
         self.bus_publisher.publish(bus_event)
 
     def _queue_caller_leave(self, event):
@@ -59,7 +59,7 @@ class QueuesBusEventHandler(object):
             body=event,
             required_acl='events.queues'
         )
-        bus_event.routing_key = 'queues.caller_leave'
+        bus_event.routing_key = 'calls.queues.caller_leave'
         self.bus_publisher.publish(bus_event)
 
     def _queue_member_added(self, event):
@@ -68,7 +68,7 @@ class QueuesBusEventHandler(object):
             body=event,
             required_acl='events.queues'
         )
-        bus_event.routing_key = 'queues.member_added'
+        bus_event.routing_key = 'calls.queues.member_added'
         self.bus_publisher.publish(bus_event)
 
     def _queue_member_pause(self, event):
@@ -77,7 +77,7 @@ class QueuesBusEventHandler(object):
             body=event,
             required_acl='events.queues'
         )
-        bus_event.routing_key = 'queues.member_pause'
+        bus_event.routing_key = 'calls.queues.member_pause'
         self.bus_publisher.publish(bus_event)
 
     def _queue_member_penalty(self, event):
@@ -86,7 +86,7 @@ class QueuesBusEventHandler(object):
             body=event,
             required_acl='events.queues'
         )
-        bus_event.routing_key = 'queues.member_penalty'
+        bus_event.routing_key = 'calls.queues.member_penalty'
         self.bus_publisher.publish(bus_event)
 
     def _queue_member_removed(self, event):
@@ -95,7 +95,7 @@ class QueuesBusEventHandler(object):
             body=event,
             required_acl='events.queues'
         )
-        bus_event.routing_key = 'queues.member_removed'
+        bus_event.routing_key = 'calls.queues.member_removed'
         self.bus_publisher.publish(bus_event)
 
     def _queue_member_ringinuse(self, event):
@@ -104,7 +104,7 @@ class QueuesBusEventHandler(object):
             body=event,
             required_acl='events.queues'
         )
-        bus_event.routing_key = 'queues.member_ringinuse'
+        bus_event.routing_key = 'calls.queues.member_ringinuse'
         self.bus_publisher.publish(bus_event)
 
     def _queue_member_status(self, event):
@@ -113,5 +113,5 @@ class QueuesBusEventHandler(object):
             body=event,
             required_acl='events.queues'
         )
-        bus_event.routing_key = 'queues.member_status'
+        bus_event.routing_key = 'calls.queues.member_status'
         self.bus_publisher.publish(bus_event)
