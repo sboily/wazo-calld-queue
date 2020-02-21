@@ -70,7 +70,7 @@ class QueueService(object):
         }
         return self.amid.action('queuepause', pause_member)
 
-   def queue_log(self, queue_log):
+    def queue_log(self, queue_log):
         self.publisher._queue_log(queue_log)
         return 1
 
