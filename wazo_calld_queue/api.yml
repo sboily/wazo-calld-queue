@@ -2,7 +2,7 @@ paths:
   /queues:
     get:
       summary: Get queues
-      description: '**Required ACL:** `ctid-ng.queues.read`'
+      description: '**Required ACL:** `calld.queues.read`'
       tags:
       - queues
       responses:
@@ -15,7 +15,7 @@ paths:
   /queues/{queue_name}:
     get:
       summary: Get queue status
-      description: '**Required ACL:** `ctid-ng.queues.{queue_name}.read`'
+      description: '**Required ACL:** `calld.queues.{queue_name}.read`'
       parameters:
         - $ref: '#/parameters/QueueName'
       tags:
@@ -30,7 +30,7 @@ paths:
   /queues/{queue_name}/add_member:
     put:
       summary: Add new member in queue
-      description: '**Required ACL:** `ctid-ng.queues.{queue_name}.add_member.update`'
+      description: '**Required ACL:** `calld.queues.{queue_name}.add_member.update`'
       parameters:
         - $ref: '#/parameters/QueueName'
         - $ref: '#/parameters/QueueAddMember'
@@ -46,7 +46,7 @@ paths:
   /queues/{queue_name}/remove_member:
     put:
       summary: Remove existing member from queue
-      description: '**Required ACL:** `ctid-ng.queues.{queue_name}.remove_member.update`'
+      description: '**Required ACL:** `calld.queues.{queue_name}.remove_member.update`'
       parameters:
         - $ref: '#/parameters/QueueName'
         - $ref: '#/parameters/QueueRemoveMember'
@@ -62,7 +62,7 @@ paths:
   /queues/{queue_name}/pause_member:
     put:
       summary: Pause/Unpause members in queue
-      description: '**Required ACL:** `ctid-ng.queues.{queue_name}.pause_member.update`'
+      description: '**Required ACL:** `calld.queues.{queue_name}.pause_member.update`'
       parameters:
         - $ref: '#/parameters/QueueName'
         - $ref: '#/parameters/QueuePauseMember'

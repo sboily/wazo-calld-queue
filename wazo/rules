@@ -1,23 +1,23 @@
 #!/bin/sh
-# Copyright 2018 Sylvain Boily
+# Copyright 2018-2020 Sylvain Boily
 # SPDX-License-Identifier: GPL-3.0+
 
 case "$1" in
     build)
-        python setup.py bdist
+        python3 setup.py bdist
         ;;
 
     package)
-        tar xvf dist/wazo-ctid-queue-*.tar.gz -C ${pkgdir}
+        tar xvf dist/wazo-calld-queue-*.tar.gz -C ${pkgdir}
         cp -R etc ${pkgdir}/
         ;;
 
     install)
-        systemctl restart xivo-ctid-ng
+        systemctl restart wazo-calld
         ;;
 
     uninstall)
-        systemctl restart xivo-ctid-ng
+        systemctl restart wazo-calld
         ;;
 
     *)

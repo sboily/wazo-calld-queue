@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-# Copyright 2018 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2018-2020 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0+
 
-from xivo_amid_client import Client as AmidClient
-from xivo_auth_client import Client as AuthClient
+from wazo_amid_client import Client as AmidClient
+from wazo_auth_client import Client as AuthClient
 
 from .resources import (
     QueuesResource,
@@ -11,6 +11,8 @@ from .resources import (
     QueueAddMemberResource,
     QueueRemoveMemberResource,
     QueuePauseMemberResource,
+    QueueLogStoreResource,
+    QueueLogRequireResource,
     )
 from .services import QueueService
 from .bus_consume import QueuesBusEventHandler
@@ -40,3 +42,5 @@ class Plugin(object):
         api.add_resource(QueueAddMemberResource, '/queues/<queue_name>/add_member', resource_class_args=[queues_service])
         api.add_resource(QueueRemoveMemberResource, '/queues/<queue_name>/remove_member', resource_class_args=[queues_service])
         api.add_resource(QueuePauseMemberResource, '/queues/<queue_name>/pause_member', resource_class_args=[queues_service])
+        api.add_resource(QueueLogStoreResource, '/queues/queue_log/store', resource_class_args=[queues_service])
+        api.add_resource(QueueLogRequireResource, '/queues/queue_log/require', resource_class_args=[queues_service])

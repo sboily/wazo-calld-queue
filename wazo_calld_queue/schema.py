@@ -8,7 +8,7 @@ from marshmallow import (
 )
 from marshmallow.validate import Length
 
-from xivo_ctid_ng.helpers.mallow import StrictDict
+from wazo_calld.helpers.mallow import StrictDict
 
 
 class QueueListSchema(Schema):

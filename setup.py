@@ -6,9 +6,9 @@ from setuptools import find_packages
 
 
 setup(
-    name='wazo-ctid-queue',
+    name='wazo-calld-queue',
     version='0.0.1',
-    description='Wazo CTI queue',
+    description='Wazo calld queue',
     author='Sylvain Boily',
     author_email='sylvain@wazo.io',
     url='http://www.wazo.io/',
@@ -16,11 +16,11 @@ setup(
     packages=find_packages(),
     include_package_data=True,
     package_data={
-        'wazo_ctid_queue': ['api.yml'],
+        'wazo_call_queue': ['api.yml'],
     },
     entry_points={
-        'xivo_ctid_ng.plugins': [
-            'queue = wazo_ctid_queue.plugin:Plugin'
+        'wazo_calld.plugins': [
+            'queue = wazo_calld_queue.plugin:Plugin'
         ],
     },
 )

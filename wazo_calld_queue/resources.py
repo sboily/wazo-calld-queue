@@ -5,8 +5,8 @@
 
 from flask import request
 
-from xivo_ctid_ng.auth import required_acl
-from xivo_ctid_ng.rest_api import AuthResource
+from calld.auth import required_acl
+from calld.rest_api import AuthResource
 
 from .schema import (
     queue_list_schema,
@@ -20,7 +20,7 @@ class QueuesResource(AuthResource):
     def __init__(self, queues_service):
         self._queues_service = queues_service
 
-    @required_acl('ctid-ng.queues.read')
+    @required_acl('calld.queues.read')
     def get(self):
         queues = self._queues_service.list_queues()
 
@@ -34,7 +34,7 @@ class QueueResource(AuthResource):
     def __init__(self, queues_service):
         self._queues_service = queues_service
 
-    @required_acl('ctid-ng.queues.{queue_name}.read')
+    @required_acl('calld.queues.{queue_name}.read')
     def get(self, queue_name):
         queue = self._queues_service.get_queue(queue_name)
 
@@ -46,7 +46,7 @@ class QueueAddMemberResource(AuthResource):
     def __init__(self, queues_service):
         self._queues_service = queues_service
 
-    @required_acl('ctid-ng.queues.{queue_name}.add_member.update')
+    @required_acl('calld.queues.{queue_name}.add_member.update')
     def put(self, queue_name):
         request_body = queue_member_schema.load(request.get_json(force=True)).data
         result = self._queues_service.add_queue_member(queue_name, request_body)
@@ -59,7 +59,7 @@ class QueueRemoveMemberResource(AuthResource):
     def __init__(self, queues_service):
         self._queues_service = queues_service
 
-    @required_acl('ctid-ng.queues.{queue_name}.remove_member.update')
+    @required_acl('calld.queues.{queue_name}.remove_member.update')
     def put(self, queue_name):
         request_body = queue_member_schema.load(request.get_json(force=True)).data
         result = self._queues_service.remove_queue_member(queue_name, request_body['interface'])
@@ -72,9 +72,27 @@ class QueuePauseMemberResource(AuthResource):
     def __init__(self, queues_service):
         self._queues_service = queues_service
 
-    @required_acl('ctid-ng.queues.{queue_name}.pause_member.update')
+    @required_acl('calld.queues.{queue_name}.pause_member.update')
     def put(self, queue_name):
         request_body = queue_member_schema.load(request.get_json(force=True)).data
         result = self._queues_service.pause_queue_member(queue_name, request_body)
 
         return result, 204
+
+
+class QueueLogStoreResource(Resource):
+
+    def __init__(self, queues_service):
+        self._queues_service = queues_service
+
+    def post(self):
+        return 1, 200
+
+
+class QueueLogRequireResource(Resource):
+
+    def __init__(self, queues_service):
+        self._queues_service = queues_service
+
+    def post(self):
+        return 0, 200
