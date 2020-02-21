@@ -4,9 +4,10 @@
 
 
 from flask import request
+from flask_restful import Resource
 
 from wazo_calld.auth import required_acl
-from wazo_calld.rest_api import AuthResource
+from wazo_calld.http import AuthResource
 
 from .schema import (
     queue_list_schema,
