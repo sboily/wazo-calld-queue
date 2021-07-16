@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright 2018-2020 Sylvain Boily
+# Copyright 2018-2021 Wazo Team (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0+
 
 case "$1" in
@@ -13,10 +13,12 @@ case "$1" in
         ;;
 
     install)
+	wazo-auth-keys service update
         systemctl restart wazo-calld
         ;;
 
     uninstall)
+	wazo-auth-keys service update
         systemctl restart wazo-calld
         ;;
 

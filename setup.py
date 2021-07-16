@@ -1,18 +1,21 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from setuptools import setup
-from setuptools import find_packages
+import yaml
 
+from setuptools import find_packages
+from setuptools import setup
+
+with open('wazo/plugin.yml') as file:
+    metadata = yaml.load(file)
 
 setup(
-    name='wazo-calld-queue',
-    version='0.0.1',
-    description='Wazo calld queue',
-    author='Sylvain Boily',
-    author_email='sylvain@wazo.io',
-    url='http://www.wazo.io/',
-    license='GPLv3',
+    name=metadata['name'],
+    version=metadata['version'],
+    description=metadata['display_name'],
+    author=metadata['author'],
+    url=metadata['homepage'],
+
     packages=find_packages(),
     include_package_data=True,
     package_data={

@@ -1,0 +1,4 @@
+wazo-calld:
+  system_user: www-data
+  acl:
+    - 'amid.action.QueueSummary.create'
