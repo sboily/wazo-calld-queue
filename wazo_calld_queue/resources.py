@@ -79,23 +79,3 @@ class QueuePauseMemberResource(AuthResource):
         result = self._queues_service.pause_queue_member(queue_name, request_body)
 
         return result, 204
-
-
-class QueueLogStoreResource(Resource):
-
-    def __init__(self, queues_service):
-        self._queues_service = queues_service
-
-    def post(self):
-        request_body = request.form.to_dict()
-        result = self._queues_service.queue_log(request_body)
-        return result, 200
-
-
-class QueueLogRequireResource(Resource):
-
-    def __init__(self, queues_service):
-        self._queues_service = queues_service
-
-    def post(self):
-        return 0, 200

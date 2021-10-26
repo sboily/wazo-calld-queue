@@ -70,9 +70,6 @@ class QueueService(object):
         }
         return self.amid.action('queuepause', pause_member)
 
-    def queue_log(self, queue_log):
-        self.publisher._queue_log(queue_log)
-        return 1
 
     def _queues(self, queue):
         return {'logged_in': queue['LoggedIn'],

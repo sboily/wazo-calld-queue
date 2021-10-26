@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2017 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2016-2021 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0+
 
 import logging
@@ -25,15 +25,6 @@ class QueuesBusEventHandler(object):
         bus_consumer.on_ami_event('QueueMemberRemoved', self._queue_member_removed)
         bus_consumer.on_ami_event('QueueMemberRinginuse', self._queue_member_ringinuse)
         bus_consumer.on_ami_event('QueueMemberStatus', self._queue_member_status)
-
-    def _queue_log(self, event):
-        bus_event = ArbitraryEvent(
-            name='queue_log',
-            body=event,
-            required_acl='events.queues'
-        )
-        bus_event.routing_key = 'calls.queues.queue_log'
-        self.bus_publisher.publish(bus_event)
 
     def _queue_caller_abandon(self, event):
         bus_event = ArbitraryEvent(

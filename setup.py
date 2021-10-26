@@ -25,5 +25,8 @@ setup(
         'wazo_calld.plugins': [
             'queue = wazo_calld_queue.plugin:Plugin'
         ],
+        'wazo_call_logd.plugins': [
+            'queue_log = wazo_call_logd_queue.plugin:Plugin'
+        ],
     },
 )
