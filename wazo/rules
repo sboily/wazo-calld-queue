@@ -15,11 +15,13 @@ case "$1" in
     install)
 	wazo-auth-keys service update
         systemctl restart wazo-calld
+        systemctl restart wazo-call-logd
         ;;
 
     uninstall)
 	wazo-auth-keys service update
         systemctl restart wazo-calld
+        systemctl restart wazo-call-logd
         ;;
 
     *)
