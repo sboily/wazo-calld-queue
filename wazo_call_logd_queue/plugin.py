@@ -7,7 +7,7 @@ from .resources import (
     QueueLogRequireResource
     )
 from .services import Services
-from .bus_publish import QueueBusPublish
+from .bus_publish import QueueBusPublisher
 
 class Plugin(object):
 
@@ -16,7 +16,7 @@ class Plugin(object):
         dao = dependencies['dao']
         bus = dependencies['bus_publisher']
 
-        publisher = QueueBusPublish(bus)
+        publisher = QueueBusPublisher(bus)
         services = QueueService(dao, publisher)
 
         api.add_resource(QueueLogStoreResource, '/queues/queue_log/store', resource_class_args=[services])
