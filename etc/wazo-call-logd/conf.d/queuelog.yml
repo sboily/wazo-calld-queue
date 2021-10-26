@@ -1,0 +1,2 @@
+enabled_plugins:
+  queue_log: true

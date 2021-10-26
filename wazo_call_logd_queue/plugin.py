@@ -17,7 +17,7 @@ class Plugin(object):
         bus = dependencies['bus_publisher']
 
         publisher = QueueBusPublisher(bus)
-        services = QueueService(dao, publisher)
+        services = Services(dao, publisher)
 
         api.add_resource(QueueLogStoreResource, '/queues/queue_log/store', resource_class_args=[services])
         api.add_resource(QueueLogRequireResource, '/queues/queue_log/require', resource_class_args=[services])
