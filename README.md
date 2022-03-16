@@ -1,4 +1,4 @@
-Add queue control to wazo-calld
+Add queue control to wazo-calld and publish to Wazo websocket Queue log from wazo-call-logd.
 
 Installation
 ------------
