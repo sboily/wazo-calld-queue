@@ -1,4 +1,8 @@
 wazo-calld:
   system_user: www-data
   acl:
-    - 'amid.action.QueueSummary.create'
+    - 'amid.action.queuesummary.create'
+    - 'amid.action.queuestatus.create'
+    - 'amid.action.queueadd.create'
+    - 'amid.action.queueremove.create'
+    - 'amid.action.queuepause.create'
