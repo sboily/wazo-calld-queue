@@ -3,6 +3,7 @@ namespace: sboily
 version: 0.0.4
 author: Sylvain Boily
 display_name: Queue API and events
+min_wazo_version: 22.06
 tags:
   - experimental
   - queue
