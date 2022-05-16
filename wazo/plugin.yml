@@ -1,6 +1,6 @@
 name: wazo-calld-queue
 namespace: sboily
-version: 0.0.3
+version: 0.0.4
 author: Sylvain Boily
 display_name: Queue API and events
 tags:

@@ -20,7 +20,6 @@ class Plugin(object):
 
     def load(self, dependencies):
         api = dependencies['api']
-        bus_publisher = dependencies['bus_publisher']
         config = dependencies['config']
         token_changed_subscribe = dependencies['token_changed_subscribe']
         bus_consumer = dependencies['bus_consumer']

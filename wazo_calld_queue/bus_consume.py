@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2021 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2016-2022 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0+
 
 import logging
@@ -16,15 +16,15 @@ class QueuesBusEventHandler(object):
         self.bus_publisher = bus_publisher
 
     def subscribe(self, bus_consumer):
-        bus_consumer.on_ami_event('QueueCallerAbandon', self._queue_caller_abandon)
-        bus_consumer.on_ami_event('QueueCallerJoin', self._queue_caller_join)
-        bus_consumer.on_ami_event('QueueCallerLeave', self._queue_caller_leave)
-        bus_consumer.on_ami_event('QueueMemberAdded', self._queue_member_added)
-        bus_consumer.on_ami_event('QueueMemberPause', self._queue_member_pause)
-        bus_consumer.on_ami_event('QueueMemberPenalty', self._queue_member_penalty)
-        bus_consumer.on_ami_event('QueueMemberRemoved', self._queue_member_removed)
-        bus_consumer.on_ami_event('QueueMemberRinginuse', self._queue_member_ringinuse)
-        bus_consumer.on_ami_event('QueueMemberStatus', self._queue_member_status)
+        bus_consumer.subscribe('QueueCallerAbandon', self._queue_caller_abandon)
+        bus_consumer.subscribe('QueueCallerJoin', self._queue_caller_join)
+        bus_consumer.subscribe('QueueCallerLeave', self._queue_caller_leave)
+        bus_consumer.subscribe('QueueMemberAdded', self._queue_member_added)
+        bus_consumer.subscribe('QueueMemberPause', self._queue_member_pause)
+        bus_consumer.subscribe('QueueMemberPenalty', self._queue_member_penalty)
+        bus_consumer.subscribe('QueueMemberRemoved', self._queue_member_removed)
+        bus_consumer.subscribe('QueueMemberRinginuse', self._queue_member_ringinuse)
+        bus_consumer.subscribe('QueueMemberStatus', self._queue_member_status)
 
     def _queue_caller_abandon(self, event):
         bus_event = ArbitraryEvent(
@@ -106,3 +106,6 @@ class QueuesBusEventHandler(object):
         )
         bus_event.routing_key = 'calls.queues.member_status'
         self.bus_publisher.publish(bus_event)
+
+    def _publish(self, bus_event):
+        self.bus_publisher.publish(bus_event, headers={'name': bus_event.name})
