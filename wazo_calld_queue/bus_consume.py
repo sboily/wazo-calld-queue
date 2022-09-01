@@ -6,7 +6,6 @@ import logging
 
 from xivo_bus.resources.common.event import ArbitraryEvent
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -14,6 +13,17 @@ class QueuesBusEventHandler(object):
 
     def __init__(self, bus_publisher):
         self.bus_publisher = bus_publisher
+
+    @staticmethod
+    def _build_headers(user_uuids=None, **kwargs):
+        headers = {}
+        for uuid in user_uuids or []:
+            headers[f'user_uuid:{uuid}'] = True
+
+        for key, value in kwargs.items():
+            if value:
+                headers[key] = value
+        return headers
 
     def subscribe(self, bus_consumer):
         bus_consumer.subscribe('QueueCallerAbandon', self._queue_caller_abandon)
@@ -42,7 +52,11 @@ class QueuesBusEventHandler(object):
             required_acl='events.queues'
         )
         bus_event.routing_key = 'calls.queues.caller_join'
-        self.bus_publisher.publish(bus_event)
+        headers = self._build_headers(
+            user_uuids=[event.get('ChanVariable', {}).get('XIVO_USERUUID')],
+            tenant_uuid=event['ChanVariable']['WAZO_TENANT_UUID'],
+        )
+        self.bus_publisher.publish(bus_event, headers=headers)
 
     def _queue_caller_leave(self, event):
         bus_event = ArbitraryEvent(
@@ -51,7 +65,11 @@ class QueuesBusEventHandler(object):
             required_acl='events.queues'
         )
         bus_event.routing_key = 'calls.queues.caller_leave'
-        self.bus_publisher.publish(bus_event)
+        headers = self._build_headers(
+            user_uuids=[event.get('ChanVariable', {}).get('XIVO_USERUUID')],
+            tenant_uuid=event['ChanVariable']['WAZO_TENANT_UUID'],
+        )
+        self.bus_publisher.publish(bus_event, headers=headers)
 
     def _queue_member_added(self, event):
         bus_event = ArbitraryEvent(
@@ -60,7 +78,11 @@ class QueuesBusEventHandler(object):
             required_acl='events.queues'
         )
         bus_event.routing_key = 'calls.queues.member_added'
-        self.bus_publisher.publish(bus_event)
+        headers = self._build_headers(
+            user_uuids=[event.get('ChanVariable', {}).get('XIVO_USERUUID')],
+            tenant_uuid=event['ChanVariable']['WAZO_TENANT_UUID'],
+        )
+        self.bus_publisher.publish(bus_event, headers=headers)
 
     def _queue_member_pause(self, event):
         bus_event = ArbitraryEvent(
@@ -69,7 +91,11 @@ class QueuesBusEventHandler(object):
             required_acl='events.queues'
         )
         bus_event.routing_key = 'calls.queues.member_pause'
-        self.bus_publisher.publish(bus_event)
+        headers = self._build_headers(
+            user_uuids=[event.get('ChanVariable', {}).get('XIVO_USERUUID')],
+            tenant_uuid=event['ChanVariable']['WAZO_TENANT_UUID'],
+        )
+        self.bus_publisher.publish(bus_event, headers=headers)
 
     def _queue_member_penalty(self, event):
         bus_event = ArbitraryEvent(
@@ -78,7 +104,11 @@ class QueuesBusEventHandler(object):
             required_acl='events.queues'
         )
         bus_event.routing_key = 'calls.queues.member_penalty'
-        self.bus_publisher.publish(bus_event)
+        headers = self._build_headers(
+            user_uuids=[event.get('ChanVariable', {}).get('XIVO_USERUUID')],
+            tenant_uuid=event['ChanVariable']['WAZO_TENANT_UUID'],
+        )
+        self.bus_publisher.publish(bus_event, headers=headers)
 
     def _queue_member_removed(self, event):
         bus_event = ArbitraryEvent(
@@ -87,7 +117,11 @@ class QueuesBusEventHandler(object):
             required_acl='events.queues'
         )
         bus_event.routing_key = 'calls.queues.member_removed'
-        self.bus_publisher.publish(bus_event)
+        headers = self._build_headers(
+            user_uuids=[event.get('ChanVariable', {}).get('XIVO_USERUUID')],
+            tenant_uuid=event['ChanVariable']['WAZO_TENANT_UUID'],
+        )
+        self.bus_publisher.publish(bus_event, headers=headers)
 
     def _queue_member_ringinuse(self, event):
         bus_event = ArbitraryEvent(
@@ -96,16 +130,26 @@ class QueuesBusEventHandler(object):
             required_acl='events.queues'
         )
         bus_event.routing_key = 'calls.queues.member_ringinuse'
-        self.bus_publisher.publish(bus_event)
+        headers = self._build_headers(
+            user_uuids=[event.get('ChanVariable', {}).get('XIVO_USERUUID')],
+            tenant_uuid=event['ChanVariable']['WAZO_TENANT_UUID'],
+        )
+        self.bus_publisher.publish(bus_event, headers=headers)
 
     def _queue_member_status(self, event):
+        logger.warning("===============_queue_member_status===============")
+        logger.warning(event)
         bus_event = ArbitraryEvent(
             name='queue_member_status',
             body=event,
             required_acl='events.queues'
         )
         bus_event.routing_key = 'calls.queues.member_status'
-        self.bus_publisher.publish(bus_event)
+        headers = self._build_headers(
+            user_uuids=[event.get('ChanVariable', {}).get('XIVO_USERUUID')],
+            tenant_uuid=event['ChanVariable']['WAZO_TENANT_UUID'],
+        )
+        self.bus_publisher.publish(bus_event, headers=headers)
 
     def _publish(self, bus_event):
         self.bus_publisher.publish(bus_event, headers={'name': bus_event.name})
