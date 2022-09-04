@@ -3,6 +3,7 @@ https://github.com/wazo-platform/xivo-bus/archive/master.zip
 https://github.com/wazo-platform/xivo-dao/archive/master.zip
 https://github.com/wazo-platform/wazo-auth-client/archive/master.zip
 https://github.com/wazo-platform/wazo-amid-client/archive/master.zip
+https://github.com/wazo-platform/wazo-confd-client/archive/master.zip
 flask==1.0.2
 flask-restful==0.3.7
 marshmallow==3.10.0
