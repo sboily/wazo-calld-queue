@@ -37,82 +37,73 @@ class QueuesBusEventHandler(object):
         bus_consumer.subscribe('QueueMemberStatus', self._queue_member_status)
 
     def _queue_caller_abandon(self, event):
-        ev = convert_keys(event)
-        tenant_uuid = self._extract_tenant_uuid(ev)
+        tenant_uuid = self._extract_tenant_uuid(event)
         bus_event = QueueCallerAbandonEvent(
-            ev,
+            event,
             tenant_uuid
         )
         self.bus_publisher.publish(bus_event)
 
     def _queue_caller_join(self, event):
-        ev = convert_keys(event)
-        tenant_uuid = self._extract_tenant_uuid(ev)
+        tenant_uuid = self._extract_tenant_uuid(event)
         bus_event = QueueCallerJoinEvent(
-            ev,
+            event,
             tenant_uuid
         )
         self.bus_publisher.publish(bus_event)
 
     def _queue_caller_leave(self, event):
-        ev = convert_keys(event)
-        tenant_uuid = self._extract_tenant_uuid(ev)
+        tenant_uuid = self._extract_tenant_uuid(event)
         bus_event = QueueCallerLeaveEvent(
-            ev,
+            event,
             tenant_uuid
         )
         self.bus_publisher.publish(bus_event)
 
     def _queue_member_added(self, event):
-        ev = convert_keys(event)
-        tenant_uuid = self._extract_tenant_uuid(ev)
+        tenant_uuid = self._extract_tenant_uuid(event)
         bus_event = QueueMemberAddedEvent(
-            ev,
+            event,
             tenant_uuid
         )
         self.bus_publisher.publish(bus_event)
 
     def _queue_member_pause(self, event):
-        ev = convert_keys(event)
-        tenant_uuid = self._extract_tenant_uuid(ev)
+        tenant_uuid = self._extract_tenant_uuid(event)
         bus_event = QueueMemberPauseEvent(
-            ev,
+            event,
             tenant_uuid
         )
         self.bus_publisher.publish(bus_event)
 
     def _queue_member_penalty(self, event):
-        ev = convert_keys(event)
-        tenant_uuid = self._extract_tenant_uuid(ev)
+        tenant_uuid = self._extract_tenant_uuid(event)
         bus_event = QueueMemberPenaltyEvent(
-            ev,
+            event,
             tenant_uuid
         )
         self.bus_publisher.publish(bus_event)
 
     def _queue_member_removed(self, event):
-        ev = convert_keys(event)
-        tenant_uuid = self._extract_tenant_uuid(ev)
+        tenant_uuid = self._extract_tenant_uuid(event)
         bus_event = QueueMemberRemovedEvent(
-            ev,
+            event,
             tenant_uuid
         )
         self.bus_publisher.publish(bus_event)
 
     def _queue_member_ringinuse(self, event):
-        ev = convert_keys(event)
-        tenant_uuid = self._extract_tenant_uuid(ev)
+        tenant_uuid = self._extract_tenant_uuid(event)
         bus_event = QueueMemberRingInUseEvent(
-            ev,
+            event,
             tenant_uuid
         )
         self.bus_publisher.publish(bus_event)
 
     def _queue_member_status(self, event):
-        ev = convert_keys(event)
-        tenant_uuid = self._extract_tenant_uuid(ev)
+        tenant_uuid = self._extract_tenant_uuid(event)
         bus_event = QueueMemberStatusEvent(
-            ev,
+            event,
             tenant_uuid
         )
         self.bus_publisher.publish(bus_event)
