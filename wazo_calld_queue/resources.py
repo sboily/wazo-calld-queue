@@ -79,3 +79,15 @@ class QueuePauseMemberResource(AuthResource):
         result = self._queues_service.pause_queue_member(queue_name, request_body)
 
         return result, 204
+
+
+class QueueLiveStatsResource(AuthResource):
+
+    def __init__(self, queues_service):
+        self._queues_service = queues_service
+
+    @required_acl('calld.queues.{queue_name}.livestats.read')
+    def get(self, queue_name):
+        result = self._queues_service.livestats(queue_name)
+
+        return result, 200

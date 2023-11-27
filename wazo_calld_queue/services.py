@@ -71,6 +71,17 @@ class QueueService(object):
         return self.amid.action('queuepause', pause_member)
 
 
+    def livestats(self, queue_name):
+        stats = {
+            'name': queue_name,
+            'count': 0,
+            'received': 0,
+            'abondonned': 0,
+            'answered': 0,
+            'awr': 0
+        }
+        return stats
+
     def _queues(self, queue):
         return {'logged_in': queue['LoggedIn'],
                 'available': queue['Available'],
