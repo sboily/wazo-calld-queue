@@ -27,6 +27,21 @@ paths:
             $ref: '#/definitions/Queue'
         '503':
           $ref: '#/responses/AnotherServiceUnavailable'
+  /queues/{queue_name}/livestats:
+    get:
+      summary: Get queue live stats
+      description: '**Required ACL:** `calld.queues.{queue_name}.livestats.read`'
+      parameters:
+        - $ref: '#/parameters/QueueName'
+      tags:
+      - queues
+      responses:
+        '200':
+          description: The live stats of a queue
+          schema:
+            $ref: '#/definitions/Queue'
+        '503':
+          $ref: '#/responses/AnotherServiceUnavailable'
   /queues/{queue_name}/add_member:
     put:
       summary: Add new member in queue
