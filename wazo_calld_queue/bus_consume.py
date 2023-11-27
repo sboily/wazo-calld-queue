@@ -4,7 +4,17 @@
 
 import logging
 
-from common.event import ArbitraryEvent
+from .events import (
+    QueueCallerAbandonEvent,
+    QueueCallerJoinEvent,
+    QueueCallerLeaveEvent,
+    QueueMemberAddedEvent,
+    QueueMemberPauseEvent,
+    QueueMemberPenaltyEvent,
+    QueueMemberRemovedEvent,
+    QueueMemberRingInUseEvent,
+    QueueMemberStatusEvent
+)
 
 
 logger = logging.getLogger(__name__)
@@ -27,85 +37,86 @@ class QueuesBusEventHandler(object):
         bus_consumer.subscribe('QueueMemberStatus', self._queue_member_status)
 
     def _queue_caller_abandon(self, event):
-        bus_event = ArbitraryEvent(
-            name='queue_caller_abandon',
-            body=event,
-            required_acl='events.queues'
+        ev = convert_keys(event)
+        tenant_uuid = self._extract_tenant_uuid(ev)
+        bus_event = QueueCallerAbandonEvent(
+            ev,
+            tenant_uuid
         )
-        bus_event.routing_key = 'calls.queues.caller_abandon'
         self.bus_publisher.publish(bus_event)
 
     def _queue_caller_join(self, event):
-        bus_event = ArbitraryEvent(
-            name='queue_caller_join',
-            body=event,
-            required_acl='events.queues'
+        ev = convert_keys(event)
+        tenant_uuid = self._extract_tenant_uuid(ev)
+        bus_event = QueueCallerJoinEvent(
+            ev,
+            tenant_uuid
         )
-        bus_event.routing_key = 'calls.queues.caller_join'
         self.bus_publisher.publish(bus_event)
 
     def _queue_caller_leave(self, event):
-        bus_event = ArbitraryEvent(
-            name='queue_caller_leave',
-            body=event,
-            required_acl='events.queues'
+        ev = convert_keys(event)
+        tenant_uuid = self._extract_tenant_uuid(ev)
+        bus_event = QueueCallerLeaveEvent(
+            ev,
+            tenant_uuid
         )
-        bus_event.routing_key = 'calls.queues.caller_leave'
         self.bus_publisher.publish(bus_event)
 
     def _queue_member_added(self, event):
-        bus_event = ArbitraryEvent(
-            name='queue_member_added',
-            body=event,
-            required_acl='events.queues'
+        ev = convert_keys(event)
+        tenant_uuid = self._extract_tenant_uuid(ev)
+        bus_event = QueueMemberAddedEvent(
+            ev,
+            tenant_uuid
         )
-        bus_event.routing_key = 'calls.queues.member_added'
         self.bus_publisher.publish(bus_event)
 
     def _queue_member_pause(self, event):
-        bus_event = ArbitraryEvent(
-            name='queue_member_pause',
-            body=event,
-            required_acl='events.queues'
+        ev = convert_keys(event)
+        tenant_uuid = self._extract_tenant_uuid(ev)
+        bus_event = QueueMemberPauseEvent(
+            ev,
+            tenant_uuid
         )
-        bus_event.routing_key = 'calls.queues.member_pause'
         self.bus_publisher.publish(bus_event)
 
     def _queue_member_penalty(self, event):
-        bus_event = ArbitraryEvent(
-            name='queue_member_penalty',
-            body=event,
-            required_acl='events.queues'
+        ev = convert_keys(event)
+        tenant_uuid = self._extract_tenant_uuid(ev)
+        bus_event = QueueMemberPenaltyEvent(
+            ev,
+            tenant_uuid
         )
-        bus_event.routing_key = 'calls.queues.member_penalty'
         self.bus_publisher.publish(bus_event)
 
     def _queue_member_removed(self, event):
-        bus_event = ArbitraryEvent(
-            name='queue_member_removed',
-            body=event,
-            required_acl='events.queues'
+        ev = convert_keys(event)
+        tenant_uuid = self._extract_tenant_uuid(ev)
+        bus_event = QueueMemberRemovedEvent(
+            ev,
+            tenant_uuid
         )
-        bus_event.routing_key = 'calls.queues.member_removed'
         self.bus_publisher.publish(bus_event)
 
     def _queue_member_ringinuse(self, event):
-        bus_event = ArbitraryEvent(
-            name='queue_member_ringinuse',
-            body=event,
-            required_acl='events.queues'
+        ev = convert_keys(event)
+        tenant_uuid = self._extract_tenant_uuid(ev)
+        bus_event = QueueMemberRingInUseEvent(
+            ev,
+            tenant_uuid
         )
-        bus_event.routing_key = 'calls.queues.member_ringinuse'
         self.bus_publisher.publish(bus_event)
 
     def _queue_member_status(self, event):
-        bus_event = ArbitraryEvent(
-            name='queue_member_status',
-            body=event,
-            required_acl='events.queues'
+        ev = convert_keys(event)
+        tenant_uuid = self._extract_tenant_uuid(ev)
+        bus_event = QueueMemberStatusEvent(
+            ev,
+            tenant_uuid
         )
-        bus_event.routing_key = 'calls.queues.member_status'
         self.bus_publisher.publish(bus_event)
 
-    def _publish(self, bus_event):
-        self.bus_publisher.publish(bus_event, headers={'name': bus_event.name})
+    def _extract_tenant_uuid(self, event):
+        tenant_uuid = event['ChanVariable']['WAZO_TENANT_UUID']
+        return tenant_uuid
