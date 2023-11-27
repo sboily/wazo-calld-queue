@@ -92,3 +92,13 @@ class QueueMemberStatusEvent(TenantEvent):
 
     def __init__(self, content, tenant_uuid):
         super().__init__(content, tenant_uuid)
+
+
+class QueueLiveStatsEvent(TenantEvent):
+    service = 'calld'
+    name = 'queue_livestats'
+    routing_key_fmt = 'calls.queue.livestats'
+    required_acl_fmt = 'events.calls.me'
+
+    def __init__(self, content, tenant_uuid):
+        super().__init__(content, tenant_uuid)

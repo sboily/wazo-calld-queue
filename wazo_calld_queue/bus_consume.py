@@ -13,8 +13,16 @@ from .events import (
     QueueMemberPenaltyEvent,
     QueueMemberRemovedEvent,
     QueueMemberRingInUseEvent,
-    QueueMemberStatusEvent
+    QueueMemberStatusEvent,
+    QueueLiveStatsEvent
 )
+
+
+stats = []
+
+# stats = [
+# {'name', 'count', 'received', 'abandonned', 'answered', 'awr'}
+# ]
 
 
 logger = logging.getLogger(__name__)
@@ -46,6 +54,7 @@ class QueuesBusEventHandler(object):
 
     def _queue_caller_join(self, event):
         tenant_uuid = self._extract_tenant_uuid(event)
+        self._livestats(event, tenant_uuid)
         bus_event = QueueCallerJoinEvent(
             event,
             tenant_uuid
@@ -107,6 +116,27 @@ class QueuesBusEventHandler(object):
             tenant_uuid
         )
         self.bus_publisher.publish(bus_event)
+
+    def _queue_live_stats(self, event, tenant_uuid):
+        bus_event = QueueLiveStatsEvent(
+            event,
+            tenant_uuid
+        )
+        self.bus_publisher.publish(bus_event)
+
+    def _livestats(self, event, tenant_uuid):
+        name = event['Queue']
+        if not stats.get('name'):
+            stats.append({
+                'name': {
+                    'count' = 1
+                }
+            }
+        else:
+            counter = stats[name]['count']+1
+            stats[name]['count'] += counter
+
+        self._queue_list_stats(event, tenant_uuid)
 
     def _extract_tenant_uuid(self, event):
         tenant_uuid = event['ChanVariable']['WAZO_TENANT_UUID']
