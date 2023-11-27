@@ -1,20 +1,9 @@
-# -*- coding: utf-8 -*-
-# Copyright 2018 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2018-2023 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0+
 
 import logging
 
-
- #QueueAdd
- #QueueChangePriorityCaller
- #QueueLog
- #QueueMemberRingInUse
- #QueuePause
- #QueuePenalty
- #QueueReload
- #QueueRemove
- #QueueReset
- #QueueRule
+from .bus_consume import stats
 
 
 class QueueService(object):
@@ -72,15 +61,7 @@ class QueueService(object):
 
 
     def livestats(self, queue_name):
-        stats = {
-            'name': queue_name,
-            'count': 0,
-            'received': 0,
-            'abondonned': 0,
-            'answered': 0,
-            'awr': 0
-        }
-        return stats
+        return stats.get(queue_name, {})
 
     def _queues(self, queue):
         return {'logged_in': queue['LoggedIn'],
