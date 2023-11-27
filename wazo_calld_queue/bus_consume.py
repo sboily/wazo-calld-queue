@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright 2016-2023 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0+
 
@@ -18,7 +17,7 @@ from .events import (
 )
 
 
-stats = []
+stats = {}
 
 # stats = [
 # {'name', 'count', 'received', 'abandonned', 'answered', 'awr'}
@@ -117,7 +116,7 @@ class QueuesBusEventHandler(object):
         )
         self.bus_publisher.publish(bus_event)
 
-    def _queue_live_stats(self, event, tenant_uuid):
+    def _queue_livestats(self, event, tenant_uuid):
         bus_event = QueueLiveStatsEvent(
             event,
             tenant_uuid
@@ -126,17 +125,17 @@ class QueuesBusEventHandler(object):
 
     def _livestats(self, event, tenant_uuid):
         name = event['Queue']
-        if not stats.get('name'):
-            stats.append({
-                'name': {
-                    'count' = 1
+        if not stats.get(name):
+            stats.update({
+                name: {
+                    'count': 1
                 }
-            }
+            })
         else:
             counter = stats[name]['count']+1
-            stats[name]['count'] += counter
+            stats[name]['count'] = counter
 
-        self._queue_list_stats(event, tenant_uuid)
+        self._queue_livestats(stats, tenant_uuid)
 
     def _extract_tenant_uuid(self, event):
         tenant_uuid = event['ChanVariable']['WAZO_TENANT_UUID']
