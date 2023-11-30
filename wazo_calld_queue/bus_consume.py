@@ -182,5 +182,8 @@ class QueuesBusEventHandler(object):
         self._queue_livestats(stats, tenant_uuid)
 
     def _extract_tenant_uuid(self, event):
-        tenant_uuid = event['ChanVariable']['WAZO_TENANT_UUID']
+        try:
+            tenant_uuid = event['ChanVariable']['WAZO_TENANT_UUID']
+        except:
+            tenant_uuid = MY_TENANT
         return tenant_uuid
