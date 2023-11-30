@@ -1,7 +1,7 @@
 # Copyright 2016-2023 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0+
 
-import logging
+import logging, math
 
 from .events import (
     QueueCallerAbandonEvent,
@@ -19,10 +19,7 @@ from .events import (
 
 stats = {}
 
-# stats = [
-# {'name', 'count', 'received', 'abandonned', 'answered', 'awr'}
-# ]
-
+MY_TENANT = '6209d5e0-4015-4853-ab2b-2e556bef5e46'
 
 logger = logging.getLogger(__name__)
 
@@ -45,6 +42,8 @@ class QueuesBusEventHandler(object):
 
     def _queue_caller_abandon(self, event):
         tenant_uuid = self._extract_tenant_uuid(event)
+        if event['Context'] == "queue":
+            self._livestats(event, tenant_uuid)
         bus_event = QueueCallerAbandonEvent(
             event,
             tenant_uuid
@@ -53,7 +52,9 @@ class QueuesBusEventHandler(object):
 
     def _queue_caller_join(self, event):
         tenant_uuid = self._extract_tenant_uuid(event)
-        self._livestats(event, tenant_uuid)
+        # Check if the call concerns a Queue and not a group
+        if event['Context'] == "queue":
+            self._livestats(event, tenant_uuid)
         bus_event = QueueCallerJoinEvent(
             event,
             tenant_uuid
@@ -62,6 +63,8 @@ class QueuesBusEventHandler(object):
 
     def _queue_caller_leave(self, event):
         tenant_uuid = self._extract_tenant_uuid(event)
+        if event['Context'] == "queue":
+            self._livestats(event, tenant_uuid)
         bus_event = QueueCallerLeaveEvent(
             event,
             tenant_uuid
@@ -124,16 +127,57 @@ class QueuesBusEventHandler(object):
         self.bus_publisher.publish(bus_event)
 
     def _livestats(self, event, tenant_uuid):
+        
+
         name = event['Queue']
+        # If the queue stats doesnot exist, create the object with default values
         if not stats.get(name):
             stats.update({
                 name: {
-                    'count': 1
+                    'count': 0,
+                    'count_color': 'green',
+                    'received': 0,
+                    'abandonned': 0,
+                    'answered': 0,
+                    'awr': 0,
+                    'waiting_calls': {}
                 }
             })
-        else:
-            counter = stats[name]['count']+1
-            stats[name]['count'] = counter
+        
+        queue_event = event['Event']
+        if queue_event == "QueueCallerJoin":
+            stats[name]['count'] = int(event['Count'])
+            stats[name]['waiting_calls'].update({
+                event['Uniqueid']: {
+                    'calleridnum': event['CallerIDNum'],
+                    'calleridname': event['CallerIDName'],
+                    'position': event['Position'],
+                    'channelstate': event['ChannelState'],
+                    'channelstatedesc': event['ChannelStateDesc'],
+                    'time': event['ChanVariable']['WAZO_ANSWER_TIME'],
+                    'entryexten': event['ChanVariable']['WAZO_ENTRY_EXTEN']
+                }
+            })
+        elif queue_event == "QueueCallerAbandon":
+            stats[name]['abandonned'] += 1
+            stats[name]['answered'] -= 1
+            if stats[name]['received'] > 0:
+                stats[name]['awr'] = math.ceil(stats[name]['answered'] / stats[name]['received'] * 100)
+            if stats[name]['waiting_calls'].get(event['Uniqueid']):
+                stats[name]['waiting_calls'].pop(event['Uniqueid'])
+        elif queue_event == "QueueCallerLeave":
+            stats[name]['count'] = int(event['Count'])
+            stats[name]['answered'] += 1
+            stats[name]['received'] += 1
+            if stats[name]['received'] > 0:
+                stats[name]['awr'] = math.ceil(stats[name]['answered'] / stats[name]['received'] * 100)
+            if stats[name]['waiting_calls'].get(event['Uniqueid']):
+                stats[name]['waiting_calls'].pop(event['Uniqueid'])
+
+        #Set color depending on limit value
+        stats[name]['count_color'] = "green";
+        if stats[name]['count'] > 0:
+            stats[name]['count_color'] = "red"
 
         self._queue_livestats(stats, tenant_uuid)
 
