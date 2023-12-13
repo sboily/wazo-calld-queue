@@ -39,7 +39,7 @@ paths:
         '200':
           description: The live stats of a queue
           schema:
-            $ref: '#/definitions/Queue'
+            $ref: '#/definitions/QueueStats'
         '503':
           $ref: '#/responses/AnotherServiceUnavailable'
   /queues/{queue_name}/add_member:
@@ -102,6 +102,33 @@ definitions:
     properties:
       items:
         $ref: '#/definitions/Queue'
+  QueueStats:
+    type: object
+    properties:
+      name:
+        description: Name
+        type: string
+      count:
+        description: Count
+        type: integer
+      received:
+        description: Received
+        type: integer
+      abandonned:
+        description: Abandonned
+        type: integer
+      answered:
+        description: Answered
+        type: integer
+      awr:
+        description: AWR
+        type: integer
+      waiting_calls:
+        description: Waiting calls
+        type: object
+      updated_at:
+        description: Updated at
+        type: string
   QueueAddMember:
     type: object
     properties:

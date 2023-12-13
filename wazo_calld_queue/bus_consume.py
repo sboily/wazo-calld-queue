@@ -21,7 +21,7 @@ from .events import (
 stats = {}
 
 # stats = [
-# {'name', 'count', 'received', 'abandonned', 'answered', 'awr'}
+# {'name', 'count', 'received', 'abandonned', 'answered', 'awr', 'waiting_calls', 'updated_at'}
 # ]
 
 MY_TENANT = '6209d5e0-4015-4853-ab2b-2e556bef5e46'
@@ -155,13 +155,15 @@ class QueuesBusEventHandler(object):
                     'abandonned': 0,
                     'answered': 0,
                     'awr': 0,
-                    'waiting_calls': []
+                    'waiting_calls': [],
+                    'updated_at': now()
                 }
             })
         
         queue_event = event['Event']
         if queue_event == "QueueCallerJoin":
             stats[name]['count'] = int(event['Count'])
+            stats[name]['updated_at'] = now()
             stats[name]['waiting_calls'].append({
                 'uniqueid': event['Uniqueid'],
                 'calleridnum': event['CallerIDNum'],
@@ -174,6 +176,7 @@ class QueuesBusEventHandler(object):
             })
         elif queue_event == "QueueCallerAbandon":
             stats[name]['abandonned'] += 1
+            stats[name]['updated_at'] = now()
             stats[name]['answered'] -= 1
             if stats[name]['received'] > 0:
                 stats[name]['awr'] = math.ceil(stats[name]['answered'] / stats[name]['received'] * 100)
@@ -182,6 +185,7 @@ class QueuesBusEventHandler(object):
                     stats[name]['waiting_calls'].pop(i)
         elif queue_event == "QueueCallerLeave":
             stats[name]['count'] = int(event['Count'])
+            stats[name]['updated_at'] = now()
             stats[name]['answered'] += 1
             stats[name]['received'] += 1
             if stats[name]['received'] > 0:
