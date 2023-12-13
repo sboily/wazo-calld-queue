@@ -1,7 +1,7 @@
 # Copyright 2016-2023 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0+
 
-import logging, math
+import datetime, logging, math
 
 from .events import (
     AgentConnectEvent,
@@ -21,7 +21,7 @@ from .events import (
 stats = {}
 
 # stats = [
-# {'name', 'count', 'received', 'abandonned', 'answered', 'awr', 'waiting_calls', 'updated_at'}
+# {'name', 'count', 'received', 'abandonned', 'answered', 'awr'}
 # ]
 
 MY_TENANT = '6209d5e0-4015-4853-ab2b-2e556bef5e46'
@@ -127,6 +127,7 @@ class QueuesBusEventHandler(object):
         self.bus_publisher.publish(bus_event)
 
     def _queue_member_status(self, event):
+        print(event)
         tenant_uuid = self._extract_tenant_uuid(event)
         bus_event = QueueMemberStatusEvent(
             event,
@@ -142,11 +143,9 @@ class QueuesBusEventHandler(object):
         print(bus_event)
         self.bus_publisher.publish(bus_event)
 
-    def _livestats(self, event, tenant_uuid):
-        name = event['Queue']
-
-        # If the queue stats doesnot exist, create the object with default values
-        if not stats.get(name):
+    def get_stats(self, name):
+        # If the queue stats doesnot exist, create the object with default values || Reset if day is different
+        if not stats.get(name) or (stats.get(name) and stats[name]['updated_at'] != datetime.datetime.now().day):
             stats.update({
                 name: {
                     'count': 0,
@@ -156,14 +155,20 @@ class QueuesBusEventHandler(object):
                     'answered': 0,
                     'awr': 0,
                     'waiting_calls': [],
-                    'updated_at': now()
+                    'updated_at': datetime.datetime.now().day
                 }
             })
+        return stats[name]
+
+    def _livestats(self, event, tenant_uuid):
+        name = event['Queue']
+
+        self.get_stats(name)
         
         queue_event = event['Event']
         if queue_event == "QueueCallerJoin":
             stats[name]['count'] = int(event['Count'])
-            stats[name]['updated_at'] = now()
+            stats[name]['updated_at'] = datetime.datetime.now().day
             stats[name]['waiting_calls'].append({
                 'uniqueid': event['Uniqueid'],
                 'calleridnum': event['CallerIDNum'],
@@ -176,7 +181,7 @@ class QueuesBusEventHandler(object):
             })
         elif queue_event == "QueueCallerAbandon":
             stats[name]['abandonned'] += 1
-            stats[name]['updated_at'] = now()
+            stats[name]['updated_at'] = datetime.datetime.now().day
             stats[name]['answered'] -= 1
             if stats[name]['received'] > 0:
                 stats[name]['awr'] = math.ceil(stats[name]['answered'] / stats[name]['received'] * 100)
@@ -185,7 +190,7 @@ class QueuesBusEventHandler(object):
                     stats[name]['waiting_calls'].pop(i)
         elif queue_event == "QueueCallerLeave":
             stats[name]['count'] = int(event['Count'])
-            stats[name]['updated_at'] = now()
+            stats[name]['updated_at'] = datetime.datetime.now().day
             stats[name]['answered'] += 1
             stats[name]['received'] += 1
             if stats[name]['received'] > 0:
@@ -196,7 +201,7 @@ class QueuesBusEventHandler(object):
 
         #Set color depending on limit value
         stats[name]['count_color'] = "green";
-        if stats[name]['count'] > 0:
+        if stats[name]['count'] > 1:
             stats[name]['count_color'] = "red"
 
         self._queue_livestats(stats, tenant_uuid)

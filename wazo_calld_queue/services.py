@@ -3,7 +3,7 @@
 
 import logging
 
-from .bus_consume import stats
+from .bus_consume import QueuesBusEventHandler
 
 
 class QueueService(object):
@@ -61,7 +61,7 @@ class QueueService(object):
 
 
     def livestats(self, queue_name):
-        return stats.get(queue_name, {})
+        return QueuesBusEventHandler.get_stats(self, queue_name)
 
     def _queues(self, queue):
         return {'logged_in': queue['LoggedIn'],
