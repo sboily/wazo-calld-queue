@@ -4,6 +4,8 @@
 
 from wazo_amid_client import Client as AmidClient
 from wazo_auth_client import Client as AuthClient
+from wazo_confd_client import Client as ConfdClient
+from wazo_agentd_client import Client as AgentdClient
 
 from .resources import (
     QueuesResource,
@@ -11,7 +13,8 @@ from .resources import (
     QueueAddMemberResource,
     QueueRemoveMemberResource,
     QueuePauseMemberResource,
-    QueueLiveStatsResource
+    QueueLiveStatsResource,
+    QueueAgentsStatusResource
     )
 from .services import QueueService
 from .bus_consume import QueuesBusEventHandler
@@ -27,13 +30,17 @@ class Plugin(object):
         bus_publisher = dependencies['bus_publisher']
 
         amid_client = AmidClient(**config['amid'])
+        confd_client = ConfdClient(**config['confd'])
+        agentd_client = AgentdClient(**config['agentd'])
 
         token_changed_subscribe(amid_client.set_token)
+        token_changed_subscribe(confd_client.set_token)
+        token_changed_subscribe(agentd_client.set_token)
 
-        queues_bus_event_handler = QueuesBusEventHandler(bus_publisher)
+        queues_bus_event_handler = QueuesBusEventHandler(bus_publisher, agentd_client)
         queues_bus_event_handler.subscribe(bus_consumer)
 
-        queues_service = QueueService(amid_client, queues_bus_event_handler)
+        queues_service = QueueService(amid_client, confd_client, queues_bus_event_handler)
 
         api.add_resource(QueuesResource, '/queues', resource_class_args=[queues_service])
         api.add_resource(QueueResource, '/queues/<queue_name>', resource_class_args=[queues_service])
@@ -41,3 +48,4 @@ class Plugin(object):
         api.add_resource(QueueRemoveMemberResource, '/queues/<queue_name>/remove_member', resource_class_args=[queues_service])
         api.add_resource(QueuePauseMemberResource, '/queues/<queue_name>/pause_member', resource_class_args=[queues_service])
         api.add_resource(QueueLiveStatsResource, '/queues/<queue_name>/livestats', resource_class_args=[queues_service])
+        api.add_resource(QueueAgentsStatusResource, '/queues/agents_status', resource_class_args=[queues_service])

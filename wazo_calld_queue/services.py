@@ -8,8 +8,9 @@ from .bus_consume import QueuesBusEventHandler
 
 class QueueService(object):
 
-    def __init__(self, amid, publisher):
+    def __init__(self, amid, confd, publisher):
         self.amid = amid
+        self.confd = confd
         self.publisher = publisher
 
     def list_queues(self):
@@ -20,6 +21,7 @@ class QueueService(object):
                 q.append(self._queues(queue))
 
         return q
+
 
     def get_queue(self, queue_name):
         queue = self.amid.action('queuestatus', {'Queue': queue_name})
@@ -62,6 +64,9 @@ class QueueService(object):
 
     def livestats(self, queue_name):
         return QueuesBusEventHandler.get_stats(self, queue_name)
+
+    def agents_status(self, tenant_uuid):
+        return QueuesBusEventHandler.get_agents_status(self, tenant_uuid)
 
     def _queues(self, queue):
         return {'logged_in': queue['LoggedIn'],
