@@ -1,9 +1,7 @@
 # Copyright 2016-2023 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0+
 
-import datetime, logging, math
-
-from .Plugin 
+import datetime, logging, math, re
 
 from .events import (
     QueueCallerAbandonEvent,
@@ -26,6 +24,8 @@ agents = {}
 #MY_TENANT = '6209d5e0-4015-4853-ab2b-2e556bef5e46'
 
 logger = logging.getLogger(__name__)
+
+AGENT_ID_FROM_IFACE = re.compile(r'^Local/id-(\d+)@agentcallback$')
 
 
 class QueuesBusEventHandler(object):
@@ -138,46 +138,57 @@ class QueuesBusEventHandler(object):
         )
         self.bus_publisher.publish(bus_event)
 
-    def _queue_agents_status(self, event, tenant_uuid):
+    def _queue_agents_status(self, event, tenant_uuid, agent):
         bus_event = QueueAgentsStatusEvent(
-            event[tenant_uuid],
+            event[tenant_uuid][agent],
             tenant_uuid
         )
         self.bus_publisher.publish(bus_event)
 
     def get_agents_status(self, tenant_uuid):
+
         if not agents.get(tenant_uuid):
             agents.update({
                 tenant_uuid: {}
             })
-
             agentList = self.confd.agents.list(tenant_uuid=tenant_uuid)
+            agentStatus = self.agentd.agents.get_agent_statuses(tenant_uuid=tenant_uuid)
 
             for agent in agentList['items']:
-                agent_id = "Agent/" + agent['number']
                 agent_fullname = ""
                 if str(agent['firstname']) != "None":
-                    agent_fullname = str(agent['firstname']) + " "
+                    agent_fullname = str(agent['firstname'])
                 if str(agent['lastname']) != "None":
-                    agent_fullname += str(agent['lastname'])
+                    agent_fullname += " " + str(agent['lastname'])
 
-                if not agents[tenant_uuid].get(agent_id):
+                status = [x.__dict__ for x in agentStatus if x.__dict__.get('id') == agent['id']]
+                if status[0].get('logged') is not None:
+                    agent_islogged = status[0].get('logged')
+                else:
+                    agent_islogged = False
+                if status[0].get('paused') is not None:
+                    agent_ispaused = status[0].get('paused') 
+                else:
+                    agent_ispaused = False
+
+                if not agents[tenant_uuid].get(agent['id']):
                     agents[tenant_uuid].update({
-                        agent_id: {
+                        agent['id']: {
                             'id': agent['id'],
+                            'number': agent['number'],
                             'fullname': agent_fullname,
-                            'is_loggued': False,
-                            'is_paused': False,
+                            'is_logged': agent_islogged,
+                            'is_paused': agent_ispaused,
                             'is_talking': False,
                             'is_ringing': False,
-                            'loggued_at': "",
+                            'logged_at': "",
                             'paused_at': "",
                             'talked_at': "",
                             'talked_with_number': "",
-                            'talked_with_name': "",
-                            'interface': ""
+                            'talked_with_name': ""
                         }
                     })
+
         return agents[tenant_uuid]
 
     def get_stats(self, name):
@@ -200,22 +211,24 @@ class QueuesBusEventHandler(object):
 
     def _agents_status(self, event, tenant_uuid):
 
+        agent = 0
+
         # QueueCallerLeave Get info about call
         if event['Event'] == "QueueCallerLeave" and event['ConnectedLineNum'] != "<unknown>":
-            agentID = "Agent/" + event['ConnectedLineNum']
-            try:
-                agents[tenant_uuid][agentID]['talked_with_number'] = event['CallerIDNum']
-            except:
-                pass 
-            
-            try:
-                agents[tenant_uuid][agentID]['talked_with_name'] = event['CallerIDName']
-            except:
-                pass
+            agentID = event['ConnectedLineNum']
+            if agents.get(tenant_uuid):
+                for i in range(len(agents[tenant_uuid])):
+                    if agents[tenant_uuid].get(i):
+                        if agents[tenant_uuid][i]['number'] == agentID:
+                            agents[tenant_uuid][i]['talked_with_number'] = event['CallerIDNum']
+                            agents[tenant_uuid][i]['talked_with_name'] = event['CallerIDName']
+                            agent = i
+                            break
         
         # Check if agents for this tenant exists
-        if event['Event'] != "QueueCallerLeave":
-            agent = event['MemberName']
+        if event['Event'] != "QueueCallerLeave" and event['Membership'] == "dynamic":
+            interface = AGENT_ID_FROM_IFACE.match(event['Interface'])
+            agent = int(interface.group(1))
             if not agents.get(tenant_uuid) or not agents[tenant_uuid].get(agent):
                 self.get_agents_status(tenant_uuid)
 
@@ -240,17 +253,17 @@ class QueuesBusEventHandler(object):
 
         if event['Event'] == "QueueMemberAdded" and event['Membership'] == "dynamic":
             # Handle connection
-            agents[tenant_uuid][agent]['is_loggued'] = True
+            agents[tenant_uuid][agent]['is_logged'] = True
             agents[tenant_uuid][agent]['interface'] = event['StateInterface']
-            agents[tenant_uuid][agent]['loggued_at'] = datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f') #LoginTime
+            agents[tenant_uuid][agent]['logged_at'] = datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f') #LoginTime
 
         if event['Event'] == "QueueMemberRemoved" and event['Membership'] == "dynamic":
             # Handle disconnection
-            agents[tenant_uuid][agent]['is_loggued'] = False
+            agents[tenant_uuid][agent]['is_logged'] = False
             agents[tenant_uuid][agent]['is_paused'] = False
             agents[tenant_uuid][agent]['is_talking'] = False
             agents[tenant_uuid][agent]['is_ringing'] = False
-            agents[tenant_uuid][agent]['loggued_at'] = ""
+            agents[tenant_uuid][agent]['logged_at'] = ""
             agents[tenant_uuid][agent]['paused_at'] = ""
             agents[tenant_uuid][agent]['talked_at'] = ""
             agents[tenant_uuid][agent]['talked_with_number'] = ""
@@ -258,7 +271,8 @@ class QueuesBusEventHandler(object):
 
         if event['Event'] == "QueueMemberPause" and event['Membership'] == "dynamic":
             # Handle pause
-            agent = event['MemberName']
+            if not agents[tenant_uuid].get(agent):
+                agents[tenant_uuid].update({agent: {}})
             if event['Paused'] == "1":
                 agents[tenant_uuid][agent]['is_paused'] = True
                 agents[tenant_uuid][agent]['paused_at'] = datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f') #LastPause
@@ -266,7 +280,8 @@ class QueuesBusEventHandler(object):
                 agents[tenant_uuid][agent]['is_paused'] = False
                 agents[tenant_uuid][agent]['paused_at'] = ""
 
-        self._queue_agents_status(agents, tenant_uuid)
+        if agent != 0:
+            self._queue_agents_status(agents, tenant_uuid, agent)
 
     def _livestats(self, event, tenant_uuid):
         name = event['Queue']
