@@ -37,7 +37,7 @@ class Plugin(object):
         token_changed_subscribe(confd_client.set_token)
         token_changed_subscribe(agentd_client.set_token)
 
-        queues_bus_event_handler = QueuesBusEventHandler(bus_publisher, agentd_client)
+        queues_bus_event_handler = QueuesBusEventHandler(bus_publisher, confd_client, agentd_client)
         queues_bus_event_handler.subscribe(bus_consumer)
 
         queues_service = QueueService(amid_client, confd_client, queues_bus_event_handler)

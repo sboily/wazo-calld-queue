@@ -28,9 +28,10 @@ logger = logging.getLogger(__name__)
 
 class QueuesBusEventHandler(object):
 
-    def __init__(self, bus_publisher, confd):
+    def __init__(self, bus_publisher, confd, agentd):
         self.bus_publisher = bus_publisher
         self.confd = confd
+        self.agentd = agentd
 
     def subscribe(self, bus_consumer):
         bus_consumer.subscribe('QueueCallerAbandon', self._queue_caller_abandon)
@@ -147,8 +148,7 @@ class QueuesBusEventHandler(object):
                 tenant_uuid: {}
             })
 
-            self.confd.set_tenant(tenant_uuid)
-            agentList = self.confd.agents.list()
+            agentList = self.confd.agents.list(tenant_uuid=tenant_uuid)
 
             for agent in agentList['items']:
                 agent_id = "Agent/" + agent['number']

@@ -1,2 +1,9 @@
 enabled_plugins:
   queue: true
+
+# wazo-agentd connection settings
+agentd:
+  host: localhost
+  port: 9493
+  prefix: null
+  https: false
