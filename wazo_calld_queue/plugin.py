@@ -33,11 +33,17 @@ class Plugin(object):
         confd_client = ConfdClient(**config['confd'])
         agentd_client = AgentdClient(**config['agentd'])
 
+        # Get tenant_uuid from config file
+        try:
+            MY_TENANT = config['calld_queue_tenant_uuid']
+        except:
+            MY_TENANT = "00000000-0000-0000-0000-000000000000"
+
         token_changed_subscribe(amid_client.set_token)
         token_changed_subscribe(confd_client.set_token)
         token_changed_subscribe(agentd_client.set_token)
 
-        queues_bus_event_handler = QueuesBusEventHandler(bus_publisher, confd_client, agentd_client)
+        queues_bus_event_handler = QueuesBusEventHandler(bus_publisher, confd_client, agentd_client, MY_TENANT)
         queues_bus_event_handler.subscribe(bus_consumer)
 
         queues_service = QueueService(amid_client, confd_client, queues_bus_event_handler)
