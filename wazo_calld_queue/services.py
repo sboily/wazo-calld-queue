@@ -8,9 +8,10 @@ from .bus_consume import QueuesBusEventHandler
 
 class QueueService(object):
 
-    def __init__(self, amid, confd, publisher):
+    def __init__(self, amid, confd, agentd, publisher):
         self.amid = amid
         self.confd = confd
+        self.agentd = agentd
         self.publisher = publisher
 
     def list_queues(self):
