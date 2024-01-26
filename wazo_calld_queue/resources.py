@@ -5,6 +5,7 @@
 
 from flask import request
 from flask_restful import Resource
+from xivo.tenant_flask_helpers import Tenant
 
 from wazo_calld.auth import required_acl
 from wazo_calld.http import AuthResource
@@ -89,5 +90,18 @@ class QueueLiveStatsResource(AuthResource):
     @required_acl('calld.queues.{queue_name}.livestats.read')
     def get(self, queue_name):
         result = self._queues_service.livestats(queue_name)
+
+        return result, 200
+
+
+class QueueAgentsStatusResource(AuthResource):
+
+    def __init__(self, queues_service):
+        self._queues_service = queues_service
+
+    @required_acl('calld.queues.agents_status.read')
+    def get(self):
+        tenant = Tenant.autodetect()
+        result = self._queues_service.agents_status(tenant.uuid)
 
         return result, 200

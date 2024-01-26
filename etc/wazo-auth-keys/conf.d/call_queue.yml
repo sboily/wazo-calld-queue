@@ -6,3 +6,4 @@ wazo-calld:
     - 'amid.action.queueadd.create'
     - 'amid.action.queueremove.create'
     - 'amid.action.queuepause.create'
+    - 'agentd.agents.read'
