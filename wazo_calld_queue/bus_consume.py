@@ -1,7 +1,7 @@
-# Copyright 2016-2023 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2016-2024 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0+
 
-import datetime, logging, math, re
+import datetime, logging, math
 
 from .events import (
     QueueCallerAbandonEvent,
@@ -21,11 +21,7 @@ from .events import (
 stats = {}
 agents = {}
 
-#MY_TENANT = '6209d5e0-4015-4853-ab2b-2e556bef5e46'
-
 logger = logging.getLogger(__name__)
-
-AGENT_ID_FROM_IFACE = re.compile(r'^Local/id-(\d+)@agentcallback$')
 
 
 class QueuesBusEventHandler(object):
@@ -167,7 +163,7 @@ class QueuesBusEventHandler(object):
                 else:
                     agent_islogged = False
                 if status[0].get('paused') is not None:
-                    agent_ispaused = status[0].get('paused') 
+                    agent_ispaused = status[0].get('paused')
                 else:
                     agent_ispaused = False
 
@@ -210,7 +206,6 @@ class QueuesBusEventHandler(object):
 
 
     def _agents_status(self, event, tenant_uuid):
-
         agent = 0
 
         # QueueCallerLeave Get info about call
@@ -224,12 +219,11 @@ class QueuesBusEventHandler(object):
                             agents[tenant_uuid][i]['talked_with_name'] = event['CallerIDName']
                             agent = i
                             break
-        
+
         # Check if agents for this tenant exists
         if event['Event'] != "QueueCallerLeave" and event['Membership'] == "dynamic":
-            interface = AGENT_ID_FROM_IFACE.match(event['Interface'])
-            agent = int(interface.group(1))
-            if not agents.get(tenant_uuid) or not agents[tenant_uuid].get(agent):
+            agent_id = event['Interface'].split('-')[1].split('@')[0]
+            if not agents.get(tenant_uuid) or not agents[tenant_uuid].get(agent_id):
                 self.get_agents_status(tenant_uuid)
 
         # QueueMemberStatus
@@ -287,7 +281,7 @@ class QueuesBusEventHandler(object):
         name = event['Queue']
 
         self.get_stats(name)
-        
+
         queue_event = event['Event']
         if queue_event == "QueueCallerJoin":
             stats[name]['count'] = int(event['Count'])
@@ -323,15 +317,19 @@ class QueuesBusEventHandler(object):
                     stats[name]['waiting_calls'].pop(i)
 
         #Set color depending on limit value
-        stats[name]['count_color'] = "green";
+        stats[name]['count_color'] = "green"
         if stats[name]['count'] > 1:
             stats[name]['count_color'] = "red"
 
         self._queue_livestats(stats, tenant_uuid)
 
     def _extract_tenant_uuid(self, event):
-        try:
+        interface = event.get('Interface')
+        if interface:
+            agent_id = interface.split('-')[1].split('@')[0]
+            agent = self.agentd.agents.get_agent_status(agent_id=agent_id)
+            tenant_uuid = agent.tenant_uuid
+        else:
             tenant_uuid = event['ChanVariable']['WAZO_TENANT_UUID']
-        except:
-            tenant_uuid = self.MY_TENANT
+
         return tenant_uuid
