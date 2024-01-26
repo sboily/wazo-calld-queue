@@ -7,3 +7,4 @@ wazo-calld:
     - 'amid.action.queueremove.create'
     - 'amid.action.queuepause.create'
     - 'agentd.agents.read'
+    - 'agentd.agents.by-id.*.read'
