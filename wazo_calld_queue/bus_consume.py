@@ -17,6 +17,8 @@ from .events import (
     QueueAgentsStatusEvent
 )
 
+from .agent import AgentStatusHandler
+
 
 stats = {}
 agents = {}
@@ -26,11 +28,10 @@ logger = logging.getLogger(__name__)
 
 class QueuesBusEventHandler(object):
 
-    def __init__(self, bus_publisher, confd, agentd, MY_TENANT):
+    def __init__(self, bus_publisher, confd, agentd):
         self.bus_publisher = bus_publisher
         self.confd = confd
         self.agentd = agentd
-        self.MY_TENANT = MY_TENANT
 
     def subscribe(self, bus_consumer):
         bus_consumer.subscribe('QueueCallerAbandon', self._queue_caller_abandon)
@@ -68,7 +69,7 @@ class QueuesBusEventHandler(object):
         tenant_uuid = self._extract_tenant_uuid(event)
         if event['Context'] == "queue":
             self._livestats(event, tenant_uuid)
-            self._agents_status(event, tenant_uuid)
+            self._update_agents_status_cache(event, tenant_uuid)
         bus_event = QueueCallerLeaveEvent(
             event,
             tenant_uuid
@@ -77,7 +78,7 @@ class QueuesBusEventHandler(object):
 
     def _queue_member_added(self, event):
         tenant_uuid = self._extract_tenant_uuid(event)
-        self._agents_status(event, tenant_uuid)
+        self._update_agents_status_cache(event, tenant_uuid)
         bus_event = QueueMemberAddedEvent(
             event,
             tenant_uuid
@@ -86,7 +87,7 @@ class QueuesBusEventHandler(object):
 
     def _queue_member_pause(self, event):
         tenant_uuid = self._extract_tenant_uuid(event)
-        self._agents_status(event, tenant_uuid)
+        self._update_agents_status_cache(event, tenant_uuid)
         bus_event = QueueMemberPauseEvent(
             event,
             tenant_uuid
@@ -103,7 +104,7 @@ class QueuesBusEventHandler(object):
 
     def _queue_member_removed(self, event):
         tenant_uuid = self._extract_tenant_uuid(event)
-        self._agents_status(event, tenant_uuid)
+        self._update_agents_status_cache(event, tenant_uuid)
         bus_event = QueueMemberRemovedEvent(
             event,
             tenant_uuid
@@ -120,7 +121,7 @@ class QueuesBusEventHandler(object):
 
     def _queue_member_status(self, event):
         tenant_uuid = self._extract_tenant_uuid(event)
-        self._agents_status(event, tenant_uuid)
+        self._update_agents_status_cache(event, tenant_uuid)
         bus_event = QueueMemberStatusEvent(
             event,
             tenant_uuid
@@ -142,53 +143,38 @@ class QueuesBusEventHandler(object):
         self.bus_publisher.publish(bus_event)
 
     def get_agents_status(self, tenant_uuid):
-
-        if not agents.get(tenant_uuid):
-            agents.update({
-                tenant_uuid: {}
-            })
+        if tenant_uuid not in agents:
+            agents[tenant_uuid] = {}
             agentList = self.confd.agents.list(tenant_uuid=tenant_uuid)
             agentStatus = self.agentd.agents.get_agent_statuses(tenant_uuid=tenant_uuid)
 
             for agent in agentList['items']:
-                agent_fullname = ""
-                if str(agent['firstname']) != "None":
-                    agent_fullname = str(agent['firstname'])
-                if str(agent['lastname']) != "None":
-                    agent_fullname += " " + str(agent['lastname'])
+                agent_fullname = " ".join(filter(None, [agent.get('firstname'), agent.get('lastname')]))
 
-                status = [x.__dict__ for x in agentStatus if x.__dict__.get('id') == agent['id']]
-                if status[0].get('logged') is not None:
-                    agent_islogged = status[0].get('logged')
-                else:
-                    agent_islogged = False
-                if status[0].get('paused') is not None:
-                    agent_ispaused = status[0].get('paused')
-                else:
-                    agent_ispaused = False
+                status = next((x.__dict__ for x in agentStatus if x.__dict__.get('id') == agent['id']), {})
+                agent_islogged = status.get('logged', False)
+                agent_ispaused = status.get('paused', False)
 
-                if not agents[tenant_uuid].get(agent['id']):
-                    agents[tenant_uuid].update({
-                        agent['id']: {
-                            'id': agent['id'],
-                            'number': agent['number'],
-                            'fullname': agent_fullname,
-                            'is_logged': agent_islogged,
-                            'is_paused': agent_ispaused,
-                            'is_talking': False,
-                            'is_ringing': False,
-                            'logged_at': "",
-                            'paused_at': "",
-                            'talked_at': "",
-                            'talked_with_number': "",
-                            'talked_with_name': ""
-                        }
-                    })
+                if agent['id'] not in agents[tenant_uuid]:
+                    agents[tenant_uuid][agent['id']] = {
+                        'id': agent['id'],
+                        'number': agent['number'],
+                        'fullname': agent_fullname,
+                        'is_logged': agent_islogged,
+                        'is_paused': agent_ispaused,
+                        'is_talking': False,
+                        'is_ringing': False,
+                        'logged_at': "",
+                        'paused_at': "",
+                        'talked_at': "",
+                        'talked_with_number': "",
+                        'talked_with_name': ""
+                    }
 
         return agents[tenant_uuid]
 
     def get_stats(self, name):
-        # If the queue stats doesnot exist, create the object with default values || Reset if day is different
+        # If the queue stats does not exist, create the object with default values || Reset if day is different
         if not stats.get(name) or (stats.get(name) and stats[name]['updated_at'] != datetime.datetime.now().day):
             stats.update({
                 name: {
@@ -205,77 +191,28 @@ class QueuesBusEventHandler(object):
         return stats[name]
 
 
-    def _agents_status(self, event, tenant_uuid):
-        agent = 0
+    def _update_agents_status_cache(self, event, tenant_uuid):
+        global agents
 
-        # QueueCallerLeave Get info about call
-        if event['Event'] == "QueueCallerLeave" and event['ConnectedLineNum'] != "<unknown>":
-            agentID = event['ConnectedLineNum']
-            if agents.get(tenant_uuid):
-                for i in range(len(agents[tenant_uuid])):
-                    if agents[tenant_uuid].get(i):
-                        if agents[tenant_uuid][i]['number'] == agentID:
-                            agents[tenant_uuid][i]['talked_with_number'] = event['CallerIDNum']
-                            agents[tenant_uuid][i]['talked_with_name'] = event['CallerIDName']
-                            agent = i
-                            break
+        eventsList = (
+            'QueueCallerLeave',
+            'QueueMemberStatus',
+            'QueueMemberAdded',
+            'QueueMemberRemoved',
+            'QueueMemberPause'
+        )
 
-        # Check if agents for this tenant exists
-        if event['Event'] != "QueueCallerLeave" and event['Membership'] == "dynamic":
-            agent_id = event['Interface'].split('-')[1].split('@')[0]
-            if not agents.get(tenant_uuid) or not agents[tenant_uuid].get(agent_id):
-                self.get_agents_status(tenant_uuid)
+        if 'Event' not in event or event['Event'] not in eventsList:
+            return
 
-        # QueueMemberStatus
-        if event['Event'] == "QueueMemberStatus" and event['Membership'] == "dynamic":
-            if event['Status'] == "6":
-                # Ringing
-                agents[tenant_uuid][agent]['is_ringing'] = True
-            if event['Status'] == "2":
-                # In comm
-                agents[tenant_uuid][agent]['is_talking'] = True
-                agents[tenant_uuid][agent]['is_ringing'] = False
-                agents[tenant_uuid][agent]['talked_at'] = datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f')
+        handler = AgentStatusHandler(event)
+        agent_id = handler.get_agent_id() or handler.find_agent_id_by_number(event, agents[tenant_uuid])
+        result = handler.handle_event()
 
-            if event['Status'] == "1":
-                # Hangup
-                agents[tenant_uuid][agent]['is_talking'] = False
-                agents[tenant_uuid][agent]['is_ringing'] = False
-                agents[tenant_uuid][agent]['talked_at'] = ""
-                agents[tenant_uuid][agent]['talked_with_number'] = ""
-                agents[tenant_uuid][agent]['talked_with_name'] = ""
-
-        if event['Event'] == "QueueMemberAdded" and event['Membership'] == "dynamic":
-            # Handle connection
-            agents[tenant_uuid][agent]['is_logged'] = True
-            agents[tenant_uuid][agent]['interface'] = event['StateInterface']
-            agents[tenant_uuid][agent]['logged_at'] = datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f') #LoginTime
-
-        if event['Event'] == "QueueMemberRemoved" and event['Membership'] == "dynamic":
-            # Handle disconnection
-            agents[tenant_uuid][agent]['is_logged'] = False
-            agents[tenant_uuid][agent]['is_paused'] = False
-            agents[tenant_uuid][agent]['is_talking'] = False
-            agents[tenant_uuid][agent]['is_ringing'] = False
-            agents[tenant_uuid][agent]['logged_at'] = ""
-            agents[tenant_uuid][agent]['paused_at'] = ""
-            agents[tenant_uuid][agent]['talked_at'] = ""
-            agents[tenant_uuid][agent]['talked_with_number'] = ""
-            agents[tenant_uuid][agent]['talked_with_name'] = ""
-
-        if event['Event'] == "QueueMemberPause" and event['Membership'] == "dynamic":
-            # Handle pause
-            if not agents[tenant_uuid].get(agent):
-                agents[tenant_uuid].update({agent: {}})
-            if event['Paused'] == "1":
-                agents[tenant_uuid][agent]['is_paused'] = True
-                agents[tenant_uuid][agent]['paused_at'] = datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f') #LastPause
-            else:
-                agents[tenant_uuid][agent]['is_paused'] = False
-                agents[tenant_uuid][agent]['paused_at'] = ""
-
-        if agent != 0:
-            self._queue_agents_status(agents, tenant_uuid, agent)
+        if result and agent_id:
+            self.get_agents_status(tenant_uuid)
+            agents[tenant_uuid][agent_id].update(result)
+            self._queue_agents_status(agents, tenant_uuid, agent_id)
 
     def _livestats(self, event, tenant_uuid):
         name = event['Queue']
