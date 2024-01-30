@@ -1,7 +1,7 @@
 # Copyright 2016-2024 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0+
 
-import datetime, logging, math
+import datetime, logging
 
 from .events import (
     QueueCallerAbandonEvent,
