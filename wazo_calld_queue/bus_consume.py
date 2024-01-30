@@ -18,6 +18,7 @@ from .events import (
 )
 
 from .agent import AgentStatusHandler
+from .queue import QueueStatusHandler
 
 
 stats = {}
@@ -192,8 +193,6 @@ class QueuesBusEventHandler(object):
 
 
     def _update_agents_status_cache(self, event, tenant_uuid):
-        global agents
-
         eventsList = (
             'QueueCallerLeave',
             'QueueMemberStatus',
@@ -216,48 +215,8 @@ class QueuesBusEventHandler(object):
 
     def _livestats(self, event, tenant_uuid):
         name = event['Queue']
-
-        self.get_stats(name)
-
-        queue_event = event['Event']
-        if queue_event == "QueueCallerJoin":
-            stats[name]['count'] = int(event['Count'])
-            stats[name]['updated_at'] = datetime.datetime.now().day
-            stats[name]['waiting_calls'].append({
-                'uniqueid': event['Uniqueid'],
-                'calleridnum': event['CallerIDNum'],
-                'calleridname': event['CallerIDName'],
-                'position': event['Position'],
-                'channelstate': event['ChannelState'],
-                'channelstatedesc': event['ChannelStateDesc'],
-                'time': event['ChanVariable']['WAZO_ANSWER_TIME'],
-                'entryexten': event['ChanVariable']['WAZO_ENTRY_EXTEN']
-            })
-        elif queue_event == "QueueCallerAbandon":
-            stats[name]['abandonned'] += 1
-            stats[name]['updated_at'] = datetime.datetime.now().day
-            stats[name]['answered'] -= 1
-            if stats[name]['received'] > 0:
-                stats[name]['awr'] = math.ceil(stats[name]['answered'] / stats[name]['received'] * 100)
-            for i in range(len(stats[name]['waiting_calls'])):
-                if stats[name]['waiting_calls'][i]['uniqueid'] == event['Uniqueid']:
-                    stats[name]['waiting_calls'].pop(i)
-        elif queue_event == "QueueCallerLeave":
-            stats[name]['count'] = int(event['Count'])
-            stats[name]['updated_at'] = datetime.datetime.now().day
-            stats[name]['answered'] += 1
-            stats[name]['received'] += 1
-            if stats[name]['received'] > 0:
-                stats[name]['awr'] = math.ceil(stats[name]['answered'] / stats[name]['received'] * 100)
-            for i in range(len(stats[name]['waiting_calls'])):
-                if stats[name]['waiting_calls'][i]['uniqueid'] == event['Uniqueid']:
-                    stats[name]['waiting_calls'].pop(i)
-
-        #Set color depending on limit value
-        stats[name]['count_color'] = "green"
-        if stats[name]['count'] > 1:
-            stats[name]['count_color'] = "red"
-
+        queue_handler = QueueStatusHandler(self.get_stats(name))
+        stats[name] = queue_handler.livestats(event, tenant_uuid)
         self._queue_livestats(stats, tenant_uuid)
 
     def _extract_tenant_uuid(self, event):
