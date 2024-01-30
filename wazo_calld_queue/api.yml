@@ -27,6 +27,34 @@ paths:
             $ref: '#/definitions/Queue'
         '503':
           $ref: '#/responses/AnotherServiceUnavailable'
+  /queues/{queue_name}/livestats:
+    get:
+      summary: Get queue live stats
+      description: '**Required ACL:** `calld.queues.{queue_name}.livestats.read`'
+      parameters:
+        - $ref: '#/parameters/QueueName'
+      tags:
+      - queues
+      responses:
+        '200':
+          description: The live stats of a queue
+          schema:
+            $ref: '#/definitions/QueueStats'
+        '503':
+          $ref: '#/responses/AnotherServiceUnavailable'
+  /queues/agents_status:
+    get:
+      summary: Get agents statuses form a queue
+      description: '**Required ACL:** `calld.queues.{queue_name}.agents_status.read`'
+      tags:
+      - queues
+      responses:
+        '200':
+          description: The agents status of a queue
+          schema:
+            $ref: '#/definitions/QueueAgentsStatus'
+        '503':
+          $ref: '#/responses/AnotherServiceUnavailable'
   /queues/{queue_name}/add_member:
     put:
       summary: Add new member in queue
@@ -87,6 +115,63 @@ definitions:
     properties:
       items:
         $ref: '#/definitions/Queue'
+  QueueStats:
+    type: object
+    properties:
+      name:
+        description: Name
+        type: string
+      count:
+        description: Count
+        type: integer
+      received:
+        description: Received
+        type: integer
+      abandonned:
+        description: Abandonned
+        type: integer
+      answered:
+        description: Answered
+        type: integer
+      awr:
+        description: AWR
+        type: integer
+      waiting_calls:
+        description: Waiting calls
+        type: object
+      updated_at:
+        description: Updated at
+        type: string
+  QueueAgentsStatus:
+    type: object
+    properties:
+      is_loggued:
+        description: Is loggued
+        type: boolean
+      is_paused:
+        description: Is paused
+        type: boolean
+      is_ringing:
+        description: Is ringing
+        type: boolean
+      is_talking:
+        description: Is talking
+        type: boolean
+      loggued_at:
+        description: Loggued at
+        type: string
+      paused_at:
+        description: Paused at
+        type: string
+      talked_at:
+        description: Talked at
+        type: string
+      talked_with_number:
+        description: Phone number of the caller
+        type: string
+      talked_with_name:
+        description: Name of the caller
+        type: string
   QueueAddMember:
     type: object
     properties:
