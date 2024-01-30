@@ -48,7 +48,7 @@ class QueuesBusEventHandler(object):
     def _queue_caller_abandon(self, event):
         tenant_uuid = self._extract_tenant_uuid(event)
         if event['Context'] == "queue":
-            self._livestats(event, tenant_uuid)
+            self._update_queue_stats_cache(event, tenant_uuid)
         bus_event = QueueCallerAbandonEvent(
             event,
             tenant_uuid
@@ -59,7 +59,7 @@ class QueuesBusEventHandler(object):
         tenant_uuid = self._extract_tenant_uuid(event)
         # Check if the call concerns a Queue and not a group
         if event['Context'] == "queue":
-            self._livestats(event, tenant_uuid)
+            self._update_queue_stats_cache(event, tenant_uuid)
         bus_event = QueueCallerJoinEvent(
             event,
             tenant_uuid
@@ -69,7 +69,7 @@ class QueuesBusEventHandler(object):
     def _queue_caller_leave(self, event):
         tenant_uuid = self._extract_tenant_uuid(event)
         if event['Context'] == "queue":
-            self._livestats(event, tenant_uuid)
+            self._update_queue_stats_cache(event, tenant_uuid)
             self._update_agents_status_cache(event, tenant_uuid)
         bus_event = QueueCallerLeaveEvent(
             event,
@@ -191,7 +191,6 @@ class QueuesBusEventHandler(object):
             })
         return stats[name]
 
-
     def _update_agents_status_cache(self, event, tenant_uuid):
         eventsList = (
             'QueueCallerLeave',
@@ -213,7 +212,7 @@ class QueuesBusEventHandler(object):
             agents[tenant_uuid][agent_id].update(result)
             self._queue_agents_status(agents, tenant_uuid, agent_id)
 
-    def _livestats(self, event, tenant_uuid):
+    def _update_queue_stats_cache(self, event, tenant_uuid):
         name = event['Queue']
         queue_handler = QueueStatusHandler(self.get_stats(name))
         stats[name] = queue_handler.livestats(event, tenant_uuid)
