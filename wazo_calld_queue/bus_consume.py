@@ -27,7 +27,7 @@ agents = {}
 logger = logging.getLogger(__name__)
 
 
-class QueuesBusEventHandler(object):
+class QueuesBusEventHandler:
 
     def __init__(self, bus_publisher, confd, agentd):
         self.bus_publisher = bus_publisher

@@ -1,7 +1,7 @@
 # Copyright 2016-2023 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0+
 
-from xivo_bus.resources.common.event import TenantEvent
+from wazo_bus.resources.common.event import TenantEvent
 
 
 class QueueCallerAbandonEvent(TenantEvent):
