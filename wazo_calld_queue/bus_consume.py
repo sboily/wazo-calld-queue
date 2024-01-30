@@ -176,19 +176,18 @@ class QueuesBusEventHandler(object):
 
     def get_stats(self, name):
         # If the queue stats does not exist, create the object with default values || Reset if day is different
-        if not stats.get(name) or (stats.get(name) and stats[name]['updated_at'] != datetime.datetime.now().day):
-            stats.update({
-                name: {
-                    'count': 0,
-                    'count_color': 'green',
-                    'received': 0,
-                    'abandonned': 0,
-                    'answered': 0,
-                    'awr': 0,
-                    'waiting_calls': [],
-                    'updated_at': datetime.datetime.now().day
-                }
-            })
+        current_day = datetime.datetime.now().day
+        if not stats.get(name) or stats[name]['updated_at'] != current_day:
+            stats[name] = {
+                'count': 0,
+                'count_color': 'green',
+                'received': 0,
+                'abandonned': 0,
+                'answered': 0,
+                'awr': 0,
+                'waiting_calls': [],
+                'updated_at': current_day
+            }
         return stats[name]
 
     def _update_agents_status_cache(self, event, tenant_uuid):
