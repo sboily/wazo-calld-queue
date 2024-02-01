@@ -171,12 +171,18 @@ class QueuesBusEventHandler(object):
                 else:
                     agent_ispaused = False
 
+                try:
+                    agent_first_queue = agent['queues'][0].get('name')
+                except:
+                    agent_first_queue = False
+
                 if not agents[tenant_uuid].get(agent['id']):
                     agents[tenant_uuid].update({
                         agent['id']: {
                             'id': agent['id'],
                             'number': agent['number'],
                             'fullname': agent_fullname,
+                            'queue': agent_first_queue,
                             'is_logged': agent_islogged,
                             'is_paused': agent_ispaused,
                             'is_talking': False,
