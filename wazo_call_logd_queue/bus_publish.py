@@ -4,7 +4,7 @@
 
 import logging
 
-from .events. import QueueLogEvent
+from .events import QueueLogEvent
 
 
 logger = logging.getLogger(__name__)
