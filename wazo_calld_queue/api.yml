@@ -105,7 +105,7 @@ paths:
           $ref: '#/responses/AnotherServiceUnavailable'
   /queues/{queue_name}/withdraw:
     put:
-      summary: Withdraw member in queue
+      summary: Withdraw call from a queue
       description: '**Required ACL:** `calld.queues.{queue_name}.withdraw.update`'
       parameters:
         - $ref: '#/parameters/QueueName'
@@ -114,9 +114,9 @@ paths:
       - queues
       responses:
         '204':
-          description: Member has been added to the queue
+          description: Caller has been withdraw from the queue
           schema:
-            $ref: '#/definitions/QueueAddMember'
+            $ref: '#/definitions/QueueWithdraw'
         '503':
           $ref: '#/responses/AnotherServiceUnavailable'
 definitions:
