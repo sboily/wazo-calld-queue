@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2018 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2018-2024 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0+
 
 from marshmallow import (
@@ -58,6 +58,14 @@ class QueueMemberSchema(Schema):
         strict = True
 
 
+class QueueWithdrawSchema(Schema):
+    call_id = fields.Str()
+    destination = fields.Str()
+
+    class Meta:
+        strict = True
+
 queue_list_schema = QueueListSchema()
 queue_schema = QueueSchema()
 queue_member_schema = QueueMemberSchema()
+queue_withdraw_schema = QueueWithdrawSchema()

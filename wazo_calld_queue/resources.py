@@ -14,6 +14,7 @@ from .schema import (
     queue_list_schema,
     queue_schema,
     queue_member_schema,
+    queue_withdraw_schema,
 )
 
 
@@ -105,3 +106,16 @@ class QueueAgentsStatusResource(AuthResource):
         result = self._queues_service.agents_status(tenant.uuid)
 
         return result, 200
+
+
+class QueueWithdrawCallerResource(AuthResource):
+
+    def __init__(self, queues_service):
+        self._queues_service = queues_service
+
+    @required_acl('calld.queues.{queue_name}.withdraw.update')
+    def put(self, queue_name):
+        request_body = queue_withdraw_schema.load(request.get_json(force=True))
+        result = self._queues_service.withdraw(queue_name, request_body)
+
+        return result, 204

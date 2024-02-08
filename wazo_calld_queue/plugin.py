@@ -14,7 +14,8 @@ from .resources import (
     QueueRemoveMemberResource,
     QueuePauseMemberResource,
     QueueLiveStatsResource,
-    QueueAgentsStatusResource
+    QueueAgentsStatusResource,
+    QueueWithdrawCallerResource
     )
 from .services import QueueService
 from .bus_consume import QueuesBusEventHandler
@@ -24,6 +25,7 @@ class Plugin(object):
 
     def load(self, dependencies):
         api = dependencies['api']
+        ari = dependencies['ari']
         config = dependencies['config']
         token_changed_subscribe = dependencies['token_changed_subscribe']
         bus_consumer = dependencies['bus_consumer']
@@ -40,7 +42,7 @@ class Plugin(object):
         queues_bus_event_handler = QueuesBusEventHandler(bus_publisher, confd_client, agentd_client)
         queues_bus_event_handler.subscribe(bus_consumer)
 
-        queues_service = QueueService(amid_client, confd_client, agentd_client, queues_bus_event_handler)
+        queues_service = QueueService(amid_client, ari.client, confd_client, agentd_client, queues_bus_event_handler)
 
         api.add_resource(QueuesResource, '/queues', resource_class_args=[queues_service])
         api.add_resource(QueueResource, '/queues/<queue_name>', resource_class_args=[queues_service])
@@ -49,3 +51,4 @@ class Plugin(object):
         api.add_resource(QueuePauseMemberResource, '/queues/<queue_name>/pause_member', resource_class_args=[queues_service])
         api.add_resource(QueueLiveStatsResource, '/queues/<queue_name>/livestats', resource_class_args=[queues_service])
         api.add_resource(QueueAgentsStatusResource, '/queues/agents_status', resource_class_args=[queues_service])
+        api.add_resource(QueueWithdrawCallerResource, '/queues/<queue_name>/withdraw', resource_class_args=[queues_service])
