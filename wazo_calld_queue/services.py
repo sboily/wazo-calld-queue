@@ -81,7 +81,7 @@ class QueueService(object):
             'Caller': channel_name,
             'WithdrawInfo': destination
         }
-        return self.amid.action('QueueWithdrawCaller', _withdraw)
+        return self.amid.action('queuewithdrawcaller', _withdraw)
 
     def _queues(self, queue):
         return {'logged_in': queue['LoggedIn'],
