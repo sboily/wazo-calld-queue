@@ -109,7 +109,7 @@ paths:
       description: '**Required ACL:** `calld.queues.{queue_name}.withdraw.update`'
       parameters:
         - $ref: '#/parameters/QueueName'
-        - $ref: '#/definitions/QueueWithdraw'
+        - $ref: '#/parameters/QueueWithdraw'
       tags:
       - queues
       responses:
@@ -262,3 +262,10 @@ parameters:
     required: true
     schema:
       $ref: '#/definitions/QueuePauseMember'
+  QueueWithdraw:
+    name: body
+    in: body
+    description: Parameter of queue withdraw
+    required: true
+    schema:
+      $ref: '#/definitions/QueueWithdraw'
