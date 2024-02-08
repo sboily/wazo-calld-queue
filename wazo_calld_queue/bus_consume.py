@@ -153,6 +153,8 @@ class QueuesBusEventHandler:
                 agent_fullname = " ".join(filter(None, [agent.get('firstname'), agent.get('lastname')]))
 
                 status = next((x.__dict__ for x in agentStatus if x.__dict__.get('id') == agent['id']), {})
+                agent_first_queue = next((queue.get('name') for queue in agent.get('queues', []) if queue.get('name')), False)
+
                 agent_islogged = status.get('logged', False)
                 agent_ispaused = status.get('paused', False)
 
@@ -160,6 +162,7 @@ class QueuesBusEventHandler:
                     agents[tenant_uuid][agent['id']] = {
                         'id': agent['id'],
                         'number': agent['number'],
+                        'queue': agent_first_queue,
                         'fullname': agent_fullname,
                         'is_logged': agent_islogged,
                         'is_paused': agent_ispaused,
