@@ -103,6 +103,22 @@ paths:
             $ref: '#/definitions/QueuePauseMember'
         '503':
           $ref: '#/responses/AnotherServiceUnavailable'
+  /queues/{queue_name}/withdraw:
+    put:
+      summary: Withdraw call from a queue
+      description: '**Required ACL:** `calld.queues.{queue_name}.withdraw.update`'
+      parameters:
+        - $ref: '#/parameters/QueueName'
+        - $ref: '#/definitions/QueueWithdraw'
+      tags:
+      - queues
+      responses:
+        '204':
+          description: Caller has been withdraw from the queue
+          schema:
+            $ref: '#/definitions/QueueWithdraw'
+        '503':
+          $ref: '#/responses/AnotherServiceUnavailable'
 definitions:
   Queue:
     type: object
@@ -208,6 +224,16 @@ definitions:
       reason:
         description: Paused reason
         type: string
+  QueueWithdraw:
+    type: object
+    properties:
+      call_id:
+        description: Channel ID to intercept
+        type: string
+      destination:
+        description: Destination extension
+        type: string
+        required: true
 parameters:
   QueueName:
     name: queue_name

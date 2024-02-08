@@ -1,4 +1,4 @@
-# Copyright 2018-2023 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2018-2024 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0+
 
 import logging
@@ -8,8 +8,9 @@ from .bus_consume import QueuesBusEventHandler
 
 class QueueService(object):
 
-    def __init__(self, amid, confd, agentd, publisher):
+    def __init__(self, amid, ari, confd, agentd, publisher):
         self.amid = amid
+        self.ari = ari
         self.confd = confd
         self.agentd = agentd
         self.publisher = publisher
@@ -68,6 +69,19 @@ class QueueService(object):
 
     def agents_status(self, tenant_uuid):
         return QueuesBusEventHandler.get_agents_status(self, tenant_uuid)
+
+    def withdraw(self, queue_name, params):
+
+        channel = self.ari.channels.get(channelId=params.get('call_id'))
+        channel_name = channel.json['name']
+        destination = params.get('destination')
+
+        _withdraw = {
+            'Queue':  queue_name,
+            'Caller': channel_name,
+            'WithdrawInfo': destination
+        }
+        return self.amid.action('QueueWithdrawCaller', _withdraw)
 
     def _queues(self, queue):
         return {'logged_in': queue['LoggedIn'],
