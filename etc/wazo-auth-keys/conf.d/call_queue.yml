@@ -1,6 +1,7 @@
 wazo-calld:
   system_user: www-data
   acl:
+    - 'amid.action.queuewithdrawcaller.create'
     - 'amid.action.queuesummary.create'
     - 'amid.action.queuestatus.create'
     - 'amid.action.queueadd.create'

@@ -11,6 +11,7 @@ from wazo_calld.auth import required_acl
 from wazo_calld.http import AuthResource
 
 from .schema import (
+    intercept_schema,
     queue_list_schema,
     queue_schema,
     queue_member_schema,
@@ -105,3 +106,16 @@ class QueueAgentsStatusResource(AuthResource):
         result = self._queues_service.agents_status(tenant.uuid)
 
         return result, 200
+
+class InterceptResource(AuthResource):
+
+    def __init__(self, queues_service):
+        self._queues_service = queues_service
+
+    @required_acl('calld.queues.{queue_name}.intercept.create')
+    def post(self, queue_name):
+        tenant = Tenant.autodetect()
+        request_body = intercept_schema.load(request.get_json(force=True))
+        result = self._queues_service.intercept_call(queue_name, request_body)
+
+        return result, 201

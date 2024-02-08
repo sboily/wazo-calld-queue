@@ -103,6 +103,20 @@ paths:
             $ref: '#/definitions/QueuePauseMember'
         '503':
           $ref: '#/responses/AnotherServiceUnavailable'
+  /queues/intercept/{queue_name}:
+    post:
+      summary: Intercept call in queue waiting list
+      description: '**Required ACL:** `calld.queues.{queue_name}.intercept.create`'
+      parameters:
+        - $ref: '#/parameters/QueueName'
+        - $ref: '#/parameters/Intercept'
+      tags:
+      - queues
+      responses:
+        '201':
+          description: Call has been intercepted
+        '503':
+          $ref: '#/responses/AnotherServiceUnavailable'
 definitions:
   Queue:
     type: object
@@ -208,6 +222,17 @@ definitions:
       reason:
         description: Paused reason
         type: string
+  InterceptCall:
+    type: object
+    properties:
+      call_id:
+        description: Channel to intercept
+        type: string
+        required: true
+      destination:
+        description: destination extension
+        type: string
+        required: true
 parameters:
   QueueName:
     name: queue_name
@@ -236,3 +261,10 @@ parameters:
     required: true
     schema:
       $ref: '#/definitions/QueuePauseMember'
+  Intercept:
+    name: body
+    in: body
+    description: Intercept call
+    required: true
+    schema:
+      $ref: '#/definitions/InterceptCall'

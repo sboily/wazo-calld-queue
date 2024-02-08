@@ -57,7 +57,12 @@ class QueueMemberSchema(Schema):
     class Meta:
         strict = True
 
+class InterceptSchema(Schema):
+    queue_name = fields.Str(validate=Length(min=1))
+    call_id = fields.Str()
+    destination = fields.Str()
 
+intercept_schema = InterceptSchema()
 queue_list_schema = QueueListSchema()
 queue_schema = QueueSchema()
 queue_member_schema = QueueMemberSchema()

@@ -8,9 +8,10 @@ from .bus_consume import QueuesBusEventHandler
 
 class QueueService(object):
 
-    def __init__(self, amid, confd, agentd, publisher):
+    def __init__(self, amid, confd, ari, agentd, publisher):
         self.amid = amid
         self.confd = confd
+        self.ari = ari
         self.agentd = agentd
         self.publisher = publisher
 
@@ -111,3 +112,18 @@ class QueueService(object):
                 'paused_reason': member.get('PausedReason'),
                 'state_interface': member.get('StateInterface'),
                 }
+
+    def intercept_call(self, queue_name, params):
+
+        channel = self.ari.channels.get(channelId=params.get('call_id'))
+        channel_name = channel.json['name']
+        destination = params.get('destination')
+
+        intercept_action = {
+            'ActionID': 123,
+            'Queue': queue_name,
+            'Caller': channel_name,
+            'WithdrawInfo': destination
+        }
+
+        return self.amid.action('queuewithdrawcaller', intercept_action)
