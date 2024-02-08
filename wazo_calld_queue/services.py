@@ -1,8 +1,6 @@
 # Copyright 2018-2024 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0+
 
-import logging
-
 from .bus_consume import QueuesBusEventHandler
 
 
@@ -23,7 +21,6 @@ class QueueService(object):
                 q.append(self._queues(queue))
 
         return q
-
 
     def get_queue(self, queue_name):
         queue = self.amid.action('queuestatus', {'Queue': queue_name})
@@ -63,7 +60,6 @@ class QueueService(object):
         }
         return self.amid.action('queuepause', pause_member)
 
-
     def livestats(self, queue_name):
         return QueuesBusEventHandler.get_stats(self, queue_name)
 
@@ -83,45 +79,25 @@ class QueueService(object):
         }
         return self.amid.action('queuewithdrawcaller', _withdraw)
 
+    def _to_snake_case(self, s):
+        return ''.join(['_'+c.lower() if c.isupper() else c for c in s]).lstrip('_')
+
+    def _transform_data(self, data, keys):
+        return {self._to_snake_case(key): data.get(key) for key in keys}
+
     def _queues(self, queue):
-        return {'logged_in': queue['LoggedIn'],
-                'available': queue['Available'],
-                'talk_time': queue['TalkTime'],
-                'longest_hold_time': queue['LongestHoldTime'],
-                'queue': queue['Queue'],
-                'talking': queue['Talking'],
-                'hold_time': queue['HoldTime'],
-                'callers': queue['Callers'],
-                }
+        keys = ['LoggedIn', 'Available', 'TalkTime', 'LongestHoldTime', 'Queue', 
+                'Talking', 'HoldTime', 'Callers']
+        return self._transform_data(queue, keys)
 
     def _queue(self, queue):
-        return {'service_level_perf': queue.get('ServiceLevelPerf'),
-                'talk_time': queue.get('TalkTime'),
-                'calls': queue.get('Calls'),
-                'max': queue.get('Max'),
-                'completed': queue.get('Completed'),
-                'service_level': queue.get('ServiceLevel'),
-                'service_level_perf2': queue.get('ServiceLevelPerf2'),
-                'abandoned': queue.get('Abandoned'),
-                'strategy': queue.get('Strategy'),
-                'queue': queue.get('Queue'),
-                'weight': queue.get('Weight'),
-                'hold_time': queue.get('HoldTime'),
-                }
+        keys = ['ServiceLevelPerf', 'TalkTime', 'Calls', 'Max', 'Completed', 
+                'ServiceLevel', 'ServiceLevelPerf2', 'Abandoned', 'Strategy', 
+                'Queue', 'Weight', 'HoldTime']
+        return self._transform_data(queue, keys)
 
     def _member(self, member):
-        return {'status': member.get('Status'),
-                'penalty': member.get('Penalty'),
-                'calls_taken': member.get('CallsTaken'),
-                'name': member.get('Name'),
-                'skills': member.get('Skills'),
-                'last_pause': member.get('LastPause'),
-                'queue': member.get('Queue'),
-                'membership': member.get('Membership'),
-                'incall': member.get('Incall'),
-                'location': member.get('Location'),
-                'last_call': member.get('LastCall'),
-                'paused': member.get('Paused'),
-                'paused_reason': member.get('PausedReason'),
-                'state_interface': member.get('StateInterface'),
-                }
+        keys = ['Status', 'Penalty', 'CallsTaken', 'Name', 'Skills', 'LastPause', 
+                'Queue', 'Membership', 'Incall', 'Location', 'LastCall', 'Paused', 
+                'PausedReason', 'StateInterface']
+        return self._transform_data(member, keys)
