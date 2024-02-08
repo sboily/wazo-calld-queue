@@ -15,22 +15,21 @@ class QueueService(object):
 
     def list_queues(self):
         queues = self.amid.action('queuesummary')
-        q = []
-        for queue in queues:
-            if queue.get('Event') == 'QueueSummary':
-                q.append(self._queues(queue))
-
-        return q
+        return [self._queues(queue) for queue in queues if queue.get('Event') == 'QueueSummary']
 
     def get_queue(self, queue_name):
-        queue = self.amid.action('queuestatus', {'Queue': queue_name})
-        q = {'members' : []}
-        for ev in queue:
-            if ev.get('Event') == 'QueueParams':
-                q.update(self._queue(ev))
-            if ev.get('Event') == 'QueueMember':
-                q['members'].append(self._member(ev))
-        return q
+        queue_data = self.amid.action('queuestatus', {'Queue': queue_name})
+        queue_info = {'members': []}
+
+        for event in queue_data:
+            event_type = event.get('Event')
+
+            if event_type == 'QueueParams':
+                 queue_info.update(self._queue(event))
+            elif event_type == 'QueueMember':
+                queue_info['members'].append(self._member(event))
+
+        return queue_info
 
     def add_queue_member(self, queue_name, member):
         add_member = {
