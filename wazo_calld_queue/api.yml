@@ -161,6 +161,18 @@ definitions:
   QueueAgentsStatus:
     type: object
     properties:
+      id:
+        description: ID
+        type: integer
+      number:
+        description: Number
+        type: string
+      queue:
+        description: First queue name
+        type: string
+      fullname:
+        description: Fullname
+        type: string
       is_loggued:
         description: Is loggued
         type: boolean
