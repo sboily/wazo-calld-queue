@@ -26,7 +26,7 @@ agents = {}
 logger = logging.getLogger(__name__)
 
 AGENT_ID_FROM_IFACE = re.compile(r'^Local/id-(\d+)@agentcallback$')
-
+MEMBER_NUM_FROM_AGENT = re.compile(r'^Agent/(\d+)$')
 
 class QueuesBusEventHandler(object):
 
@@ -194,8 +194,30 @@ class QueuesBusEventHandler(object):
                             'talked_with_name': ""
                         }
                     })
-
+        print(agents[tenant_uuid])
         return agents[tenant_uuid]
+
+    def add_agent(self, tenant_uuid, agent, member):
+        if not agents[tenant_uuid].get(agent):
+            agents[tenant_uuid].update({
+                agent: {
+                    'id': agent,
+                    'number': member,
+                    'fullname': member,
+                    'queue': "",
+                    'is_logged': False,
+                    'is_paused': False,
+                    'is_talking': False,
+                    'is_ringing': False,
+                    'logged_at': "",
+                    'paused_at': "",
+                    'talked_at': "",
+                    'talked_with_number': "",
+                    'talked_with_name': ""
+                }
+            })
+        #print(agents[tenant_uuid].get(agent))
+        #print(agents[tenant_uuid])
 
     def get_stats(self, name):
         # If the queue stats doesnot exist, create the object with default values || Reset if day is different
@@ -235,8 +257,14 @@ class QueuesBusEventHandler(object):
         if event['Event'] != "QueueCallerLeave" and event['Membership'] == "dynamic":
             interface = AGENT_ID_FROM_IFACE.match(event['Interface'])
             agent = int(interface.group(1))
-            if not agents.get(tenant_uuid) or not agents[tenant_uuid].get(agent):
+            if not agents.get(tenant_uuid):
                 self.get_agents_status(tenant_uuid)
+            if not agents[tenant_uuid].get(agent):
+                member = MEMBER_NUM_FROM_AGENT.match(event['MemberName'])
+                member_num = int(member.group(1))
+                self.add_agent(tenant_uuid, agent, member_num)
+            if agents[tenant_uuid][agent]['queue'] != event['Queue']:
+                agents[tenant_uuid][agent]['queue'] = event['Queue']
 
         # QueueMemberStatus
         if event['Event'] == "QueueMemberStatus" and event['Membership'] == "dynamic":
