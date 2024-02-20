@@ -240,19 +240,7 @@ class QueuesBusEventHandler(object):
     def _agents_status(self, event, tenant_uuid):
 
         agent = 0
-
-        # QueueCallerLeave Get info about call
-        if event['Event'] == "QueueCallerLeave" and event['ConnectedLineNum'] != "<unknown>":
-            agentID = event['ConnectedLineNum']
-            if agents.get(tenant_uuid):
-                for i in range(len(agents[tenant_uuid])):
-                    if agents[tenant_uuid].get(i):
-                        if agents[tenant_uuid][i]['number'] == agentID:
-                            agents[tenant_uuid][i]['talked_with_number'] = event['CallerIDNum']
-                            agents[tenant_uuid][i]['talked_with_name'] = event['CallerIDName']
-                            agent = i
-                            break
-        
+    
         # Check if agents for this tenant exists
         if event['Event'] != "QueueCallerLeave" and event['Membership'] == "dynamic":
             interface = AGENT_ID_FROM_IFACE.match(event['Interface'])
@@ -265,6 +253,18 @@ class QueuesBusEventHandler(object):
                 self.add_agent(tenant_uuid, agent, member_num)
             if agents[tenant_uuid][agent]['queue'] != event['Queue']:
                 agents[tenant_uuid][agent]['queue'] = event['Queue']
+
+        # QueueCallerLeave Get info about call
+        if event['Event'] == "QueueCallerLeave" and event['ConnectedLineNum'] != "<unknown>":
+            agentID = event['ConnectedLineNum']
+            if agents.get(tenant_uuid):
+                for i, k in enumerate(agents[tenant_uuid]):
+                    if agents[tenant_uuid].get(k):
+                        if agents[tenant_uuid][k]['number'] == agentID:
+                            agents[tenant_uuid][k]['talked_with_number'] = event['CallerIDNum']
+                            agents[tenant_uuid][k]['talked_with_name'] = event['CallerIDName']
+                            agent = k
+                            break
 
         # QueueMemberStatus
         if event['Event'] == "QueueMemberStatus" and event['Membership'] == "dynamic":
