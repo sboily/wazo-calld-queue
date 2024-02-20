@@ -199,12 +199,22 @@ class QueuesBusEventHandler(object):
 
     def add_agent(self, tenant_uuid, agent, member):
         if not agents[tenant_uuid].get(agent):
+            agentInfo = self.confd.agents.get(resource_or_id=agent,tenant_uuid=tenant_uuid)
+            agent_fullname = ""
+            if str(agentInfo['firstname']) != "None":
+                agent_fullname = str(agentInfo['firstname'])
+            if str(agentInfo['lastname']) != "None":
+                agent_fullname += " " + str(agentInfo['lastname'])
+            try:
+                agent_first_queue = agentList['queues'][0].get('name')
+            except:
+                agent_first_queue = False
             agents[tenant_uuid].update({
                 agent: {
                     'id': agent,
                     'number': member,
-                    'fullname': member,
-                    'queue': "",
+                    'fullname': agent_fullname,
+                    'queue': agent_first_queue,
                     'is_logged': False,
                     'is_paused': False,
                     'is_talking': False,
