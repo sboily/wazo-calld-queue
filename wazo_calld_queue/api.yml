@@ -103,18 +103,20 @@ paths:
             $ref: '#/definitions/QueuePauseMember'
         '503':
           $ref: '#/responses/AnotherServiceUnavailable'
-  /queues/intercept/{queue_name}:
-    post:
-      summary: Intercept call in queue waiting list
-      description: '**Required ACL:** `calld.queues.{queue_name}.intercept.create`'
+  /queues/{queue_name}/withdraw:
+    put:
+      summary: Withdraw call from a queue
+      description: '**Required ACL:** `calld.queues.{queue_name}.withdraw.create`'
       parameters:
         - $ref: '#/parameters/QueueName'
-        - $ref: '#/parameters/Intercept'
+        - $ref: '#/parameters/QueueWithdraw'
       tags:
       - queues
       responses:
-        '201':
-          description: Call has been intercepted
+        '204':
+          description: Caller has been withdraw from the queue
+          schema:
+            $ref: '#/definitions/QueueWithdraw'
         '503':
           $ref: '#/responses/AnotherServiceUnavailable'
 definitions:
@@ -159,6 +161,18 @@ definitions:
   QueueAgentsStatus:
     type: object
     properties:
+      id:
+        description: ID
+        type: integer
+      number:
+        description: Number
+        type: string
+      queue:
+        description: First queue name
+        type: string
+      fullname:
+        description: Fullname
+        type: string
       is_loggued:
         description: Is loggued
         type: boolean
@@ -222,11 +236,11 @@ definitions:
       reason:
         description: Paused reason
         type: string
-  InterceptCall:
+  QueueWithdraw:
     type: object
     properties:
       call_id:
-        description: Channel to intercept
+        description: Channel ID to intercept
         type: string
         required: true
       destination:
@@ -261,10 +275,10 @@ parameters:
     required: true
     schema:
       $ref: '#/definitions/QueuePauseMember'
-  Intercept:
+  QueueWithdraw:
     name: body
     in: body
-    description: Intercept call
+    description: Parameter of queue withdraw
     required: true
     schema:
-      $ref: '#/definitions/InterceptCall'
+      $ref: '#/definitions/QueueWithdraw'

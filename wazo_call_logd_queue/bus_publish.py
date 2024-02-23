@@ -1,25 +1,22 @@
 # -*- coding: utf-8 -*-
-# Copyright 2016-2023 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2016-2024 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0+
 
 import logging
 
-from common.event import ArbitraryEvent
+from .events import QueueLogEvent
 
 
 logger = logging.getLogger(__name__)
 
 
-class QueueBusPublisher(object):
+class QueueBusPublisher:
 
     def __init__(self, bus_publisher):
         self.bus_publisher = bus_publisher
 
     def _queue_log(self, event):
-        bus_event = ArbitraryEvent(
-            name='queue_log',
-            body=event,
-            required_acl='events.queues'
+        bus_event = QueueLogEvent(
+            event
         )
-        bus_event.routing_key = 'calls.queues.queue_log'
         self.bus_publisher.publish(bus_event)

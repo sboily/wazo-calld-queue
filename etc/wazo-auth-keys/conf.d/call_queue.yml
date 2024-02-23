@@ -1,10 +1,11 @@
 wazo-calld:
   system_user: www-data
   acl:
-    - 'amid.action.queuewithdrawcaller.create'
     - 'amid.action.queuesummary.create'
     - 'amid.action.queuestatus.create'
     - 'amid.action.queueadd.create'
     - 'amid.action.queueremove.create'
     - 'amid.action.queuepause.create'
+    - 'amid.action.queuewithdrawcaller.create'
     - 'agentd.agents.read'
+    - 'agentd.agents.by-id.*.read'

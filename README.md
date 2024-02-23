@@ -9,12 +9,3 @@ Use
 ---
 
 Check the API in your wazo in calld section in http://wazo_ip/api
-
-Optional configuration
-----------------------
-
-If you want to use agent events within Nodered, you need to add a new file `/etc/wazo-calld/conf.d/01-queue.yml`:
-
-```
-calld_queue_tenant_uuid: MY_TENANT_UUID
-```

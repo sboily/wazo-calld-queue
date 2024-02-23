@@ -1,7 +1,5 @@
-# Copyright 2018-2023 The Wazo Authors  (see the AUTHORS file)
+# Copyright 2018-2024 The Wazo Authors  (see the AUTHORS file)
 # SPDX-License-Identifier: GPL-3.0+
-
-import logging
 
 from .bus_consume import QueuesBusEventHandler
 
@@ -17,23 +15,22 @@ class QueueService(object):
 
     def list_queues(self):
         queues = self.amid.action('queuesummary')
-        q = []
-        for queue in queues:
-            if queue.get('Event') == 'QueueSummary':
-                q.append(self._queues(queue))
-
-        return q
+        return [self._queues(queue) for queue in queues if queue.get('Event') == 'QueueSummary']
 
 
     def get_queue(self, queue_name):
-        queue = self.amid.action('queuestatus', {'Queue': queue_name})
-        q = {'members' : []}
-        for ev in queue:
-            if ev.get('Event') == 'QueueParams':
-                q.update(self._queue(ev))
-            if ev.get('Event') == 'QueueMember':
-                q['members'].append(self._member(ev))
-        return q
+        queue_data = self.amid.action('queuestatus', {'Queue': queue_name})
+        queue_info = {'members': []}
+
+        for event in queue_data:
+            event_type = event.get('Event')
+
+            if event_type == 'QueueParams':
+                 queue_info.update(self._queue(event))
+            elif event_type == 'QueueMember':
+                queue_info['members'].append(self._member(event))
+
+        return queue_info
 
     def add_queue_member(self, queue_name, member):
         add_member = {
@@ -62,7 +59,6 @@ class QueueService(object):
             'Reason': params.get('reason')
         }
         return self.amid.action('queuepause', pause_member)
-
 
     def livestats(self, queue_name):
         return QueuesBusEventHandler.get_stats(self, queue_name)
@@ -113,17 +109,17 @@ class QueueService(object):
                 'state_interface': member.get('StateInterface'),
                 }
 
-    def intercept_call(self, queue_name, params):
+    def withdraw(self, queue_name, params):
 
         channel = self.ari.channels.get(channelId=params.get('call_id'))
         channel_name = channel.json['name']
         destination = params.get('destination')
 
-        intercept_action = {
+        _withdraw = {
             'ActionID': 123,
             'Queue': queue_name,
             'Caller': channel_name,
             'WithdrawInfo': destination
         }
 
-        return self.amid.action('queuewithdrawcaller', intercept_action)
+        return self.amid.action('queuewithdrawcaller', _withdraw)
